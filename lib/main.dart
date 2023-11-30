@@ -1,5 +1,8 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:flutter/material.dart';
 import 'package:blogapp/login.dart';
@@ -26,20 +29,38 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const Login(),
+      home: (FirebaseAuth.instance.currentUser != null)
+          ? const Home()
+          : const Login(),
     );
   }
 }
 
-class Home extends StatelessWidget {
+class Home extends StatefulWidget {
   const Home({super.key});
 
   @override
+  State<Home> createState() => _HomeState();
+}
+
+class _HomeState extends State<Home> {
+  @override
   Widget build(BuildContext context) {
+    var reuse = ReusableWidgets();
+
     return Scaffold(
       appBar: AppBar(title: Text("Home")),
-      body: Placeholder(),
+      body: Center(
+          child: reuse.createButton(
+              buttonText: "Sign out", onPressed: logoutAccount)),
     );
+  }
+
+  void logoutAccount() async {
+    await FirebaseAuth.instance.signOut();
+    Navigator.popUntil(context, (route) => route.isFirst);
+    Navigator.pushReplacement(
+        context, MaterialPageRoute(builder: (context) => const Login()));
   }
 }
 

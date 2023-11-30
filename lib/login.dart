@@ -66,10 +66,10 @@ class _LoginState extends State<Login> {
           .signInWithEmailAndPassword(email: email, password: password);
 
       if (userCredential.user != null) {
-        Navigator.pushAndRemoveUntil(
+        Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => const Home()),
-            (route) => false);
+            );
       }
     } on FirebaseAuthException catch (ex) {
       debugPrint(ex.code.toString());
@@ -78,7 +78,7 @@ class _LoginState extends State<Login> {
 }
 
 class SignUp extends StatefulWidget {
-  SignUp({super.key});
+  const SignUp({super.key});
 
   @override
   State<SignUp> createState() => _SignUpState();
