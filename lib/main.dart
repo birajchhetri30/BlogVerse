@@ -1,4 +1,7 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/cupertino.dart';
 import 'firebase_options.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -67,12 +70,19 @@ class ReusableWidgets {
   Widget createTextField(
       {required String labelText,
       TextEditingController? controller,
+      bool isName = false,
+      bool isEmail = false,
       bool isPassword = false}) {
     var theme = Theme.of(context);
     return SizedBox(
       width: 300,
       child: TextFormField(
         controller: controller,
+        contextMenuBuilder: contextMenu,
+        textCapitalization:
+            isName ? TextCapitalization.words : TextCapitalization.none,
+        keyboardType: (isEmail) ? TextInputType.emailAddress : null,
+        cursorColor: theme.colorScheme.secondary,
         decoration: InputDecoration(
             labelText: labelText,
             labelStyle: TextStyle(color: theme.colorScheme.onBackground),
@@ -120,5 +130,50 @@ class ReusableWidgets {
       onPressed: () {},
       icon: icon!,
     );
+  }
+
+  ScaffoldFeatureController createSnackBar(BuildContext context,
+      {required String content, bool isError = true}) {
+    var theme = Theme.of(context);
+    var textStyle =
+        theme.textTheme.bodyLarge!.copyWith(color: theme.colorScheme.onError);
+
+    return ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(
+        content,
+        style: textStyle,
+        textAlign: TextAlign.center,
+      ),
+      backgroundColor:
+          (isError) ? theme.colorScheme.error : theme.colorScheme.secondary,
+      elevation: 2,
+      duration: const Duration(seconds: 3),
+    ));
+  }
+
+  Widget contextMenu(
+      BuildContext context, EditableTextState editableTextState) {
+    var theme = Theme.of(context);
+    return AdaptiveTextSelectionToolbar(
+        anchors: editableTextState.contextMenuAnchors,
+        children: editableTextState.contextMenuButtonItems
+            .map((ContextMenuButtonItem buttonItem) {
+          return CupertinoButton(
+            borderRadius: null,
+            color: theme.colorScheme.primary,
+            padding: const EdgeInsets.all(8),
+            onPressed: buttonItem.onPressed,
+            pressedOpacity: 0.5,
+            child: SizedBox(
+              width: 60,
+              child: Text(
+                CupertinoTextSelectionToolbarButton.getButtonLabel(
+                    context, buttonItem),
+                style: const TextStyle(color: Colors.white, fontSize: 12),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          );
+        }).toList());
   }
 }
