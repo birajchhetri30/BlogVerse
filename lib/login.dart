@@ -51,7 +51,7 @@ class _LoginState extends State<Login> {
             ),
             const SizedBox(height: 60),
             reuse.createTextField(
-                labelText: "Email", controller: emailController),
+                labelText: "Email", controller: emailController, isEmail: true),
             const SizedBox(height: 20),
             reuse.createTextField(
                 labelText: "Password",
@@ -91,19 +91,35 @@ class _LoginState extends State<Login> {
   void loginAccount() async {
     String email = emailController.text.trim();
     String password = passwordController.text.trim();
+    var reuse = ReusableWidgets(context);
 
-    try {
-      UserCredential userCredential = await FirebaseAuth.instance
-          .signInWithEmailAndPassword(email: email, password: password);
+    if (email.isEmpty || password.isEmpty) {
+      reuse.createSnackBar(context, content: "Please fill all the fields");
+    } else {
+      try {
+        UserCredential userCredential = await FirebaseAuth.instance
+            .signInWithEmailAndPassword(email: email, password: password);
 
-      if (userCredential.user != null) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const Home()),
-        );
+        if (userCredential.user != null) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const Home()),
+          );
+        }
+      } on FirebaseAuthException catch (ex) {
+        var error = ex.code.toString();
+
+        if (error == "invalid-email") {
+          reuse.createSnackBar(context,
+              content: "Please enter a valid email address");
+        } else if (error == "user-not-found") {
+          reuse.createSnackBar(context,
+              content: "Entered email is not regestered");
+        } else if (error == "invalid-credential") {
+          reuse.createSnackBar(context, content: "Incorrect email/password");
+        }
+        debugPrint(ex.code.toString());
       }
-    } on FirebaseAuthException catch (ex) {
-      debugPrint(ex.code.toString());
     }
   }
 }
@@ -156,13 +172,17 @@ class _SignUpState extends State<SignUp> {
           ),
           SizedBox(height: 60),
           reuse.createTextField(
-              labelText: "First Name", controller: fnameController),
+              labelText: "First Name",
+              controller: fnameController,
+              isName: true),
           const SizedBox(height: 20),
           reuse.createTextField(
-              labelText: "Last Name", controller: lnameController),
+              labelText: "Last Name",
+              controller: lnameController,
+              isName: true),
           const SizedBox(height: 20),
           reuse.createTextField(
-              labelText: "Email", controller: emailController),
+              labelText: "Email", controller: emailController, isEmail: true),
           const SizedBox(height: 20),
           reuse.createTextField(
               labelText: "Password",
@@ -175,7 +195,21 @@ class _SignUpState extends State<SignUp> {
               isPassword: true),
           const SizedBox(height: 50),
           reuse.createButton(
-              buttonText: "Create account", onPressed: createAccount)
+              buttonText: "Create account", onPressed: createAccount),
+          const SizedBox(height: 10),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text("Already have an account?"),
+              TextButton(
+                  style: TextButton.styleFrom(padding: const EdgeInsets.all(1)),
+                  onPressed: () {
+                    Navigator.pop(context,
+                        MaterialPageRoute(builder: (context) => const Login()));
+                  },
+                  child: Text("Sign in", style: textButtonStyle)),
+            ],
+          )
         ],
       ),
     ));
@@ -186,17 +220,41 @@ class _SignUpState extends State<SignUp> {
     String lname = lnameController.text.trim();
     String email = emailController.text.trim();
     String password = passwordController.text.trim();
+    String confirmPassword = confirmPasswordController.text.trim();
 
-    try {
-      UserCredential userCredential = await FirebaseAuth.instance
-          .createUserWithEmailAndPassword(email: email, password: password);
-      debugPrint('User created');
+    var reuse = ReusableWidgets(context);
 
-      if (userCredential.user != null) {
-        Navigator.pop(context);
+    if (fname.isEmpty ||
+        lname.isEmpty ||
+        email.isEmpty ||
+        password.isEmpty ||
+        confirmPassword.isEmpty) {
+      reuse.createSnackBar(context, content: "Please fill all the fields");
+    } else if (password != confirmPassword) {
+      reuse.createSnackBar(context, content: "Passwords do not match");
+    } else {
+      try {
+        UserCredential userCredential = await FirebaseAuth.instance
+            .createUserWithEmailAndPassword(email: email, password: password);
+        debugPrint('User created');
+
+        if (userCredential.user != null) {
+          Navigator.pop(context);
+        }
+      } on FirebaseAuthException catch (ex) {
+        var error = ex.code.toString();
+        if (error == "email-already-in-use") {
+          reuse.createSnackBar(context,
+              content: "Entered email is already in use");
+        } else if (error == "invalid-email") {
+          reuse.createSnackBar(context,
+              content: "Please enter a valid email address");
+        } else if (error == "weak-password") {
+          reuse.createSnackBar(context,
+              content: "Password must be at least 6 characters long");
+        }
+        debugPrint(ex.code.toString());
       }
-    } on FirebaseAuthException catch (ex) {
-      debugPrint(ex.code.toString());
     }
   }
 }
