@@ -1,2 +1,2 @@
 # BlogVerse
- BlogVerse - A Blog App made in Flutter
+ A Blog App made in Flutter
