@@ -1,19 +1,36 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
 import 'firebase_options.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:flutter/material.dart';
 import 'package:blogapp/login.dart';
 import 'package:blogapp/theme.dart';
+import 'package:blogapp/home.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  // QuerySnapshot snapshot =
+  //     await FirebaseFirestore.instance.collection("users").get();
+
+  // for (var doc in snapshot.docs) {
+  //   debugPrint("Id: ${doc.id}, Data: ${doc.data()}");
+  // }
+
+  DocumentSnapshot snapshot = await FirebaseFirestore.instance
+      .collection("users")
+      .doc(FirebaseAuth.instance.currentUser!.email)
+      .get();
+
+  debugPrint("USer: ${snapshot.data()}");
 
   runApp(const MyApp());
 }
@@ -23,6 +40,10 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var systemTheme = SystemUiOverlayStyle(
+      systemNavigationBarColor: CustomTheme().getTheme().colorScheme.primary,
+    );
+    SystemChrome.setSystemUIOverlayStyle(systemTheme);
     return MaterialApp(
       title: 'Flutter Demo',
       debugShowCheckedModeBanner: false,
@@ -31,34 +52,6 @@ class MyApp extends StatelessWidget {
           ? const Home()
           : const Login(),
     );
-  }
-}
-
-class Home extends StatefulWidget {
-  const Home({super.key});
-
-  @override
-  State<Home> createState() => _HomeState();
-}
-
-class _HomeState extends State<Home> {
-  @override
-  Widget build(BuildContext context) {
-    var reuse = ReusableWidgets(context);
-
-    return Scaffold(
-      appBar: AppBar(title: const Text("Home")),
-      body: Center(
-          child: reuse.createButton(
-              buttonText: "Sign out", onPressed: logoutAccount)),
-    );
-  }
-
-  void logoutAccount() async {
-    await FirebaseAuth.instance.signOut();
-    Navigator.popUntil(context, (route) => route.isFirst);
-    Navigator.pushReplacement(
-        context, MaterialPageRoute(builder: (context) => const Login()));
   }
 }
 
@@ -125,10 +118,18 @@ class ReusableWidgets {
         child: Text(buttonText, style: textStyle));
   }
 
-  Widget createIconButton({Icon? icon, String? buttonText}) {
+  Widget createIconButton({required Icon icon, required Function() onPressed}) {
+    var theme = Theme.of(context);
+    var isSelected = false;
     return IconButton(
-      onPressed: () {},
-      icon: icon!,
+      onPressed: onPressed,
+      icon: icon,
+      isSelected: isSelected,
+      selectedIcon: Icon(
+        icon.icon,
+        color: theme.colorScheme.secondary,
+      ),
+      iconSize: 35,
     );
   }
 
