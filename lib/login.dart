@@ -1,9 +1,10 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:blogapp/main.dart';
+import 'package:blogapp/home.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:blogapp/theme.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class LoginControl {}
 
@@ -170,7 +171,7 @@ class _SignUpState extends State<SignUp> {
             "Sign up",
             style: titleStyle,
           ),
-          SizedBox(height: 60),
+          const SizedBox(height: 60),
           reuse.createTextField(
               labelText: "First Name",
               controller: fnameController,
@@ -241,6 +242,10 @@ class _SignUpState extends State<SignUp> {
         if (userCredential.user != null) {
           Navigator.pop(context);
         }
+
+        Map<String, dynamic> newUser = {'fname': fname, 'lname': lname};
+        FirebaseFirestore.instance.collection("users").doc(email).set(newUser);
+        
       } on FirebaseAuthException catch (ex) {
         var error = ex.code.toString();
         if (error == "email-already-in-use") {
