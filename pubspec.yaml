@@ -31,12 +31,13 @@ dependencies:
   flutter:
     sdk: flutter
 
-
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
   firebase_core: ^2.24.0
   firebase_auth: ^4.15.0
+  sqflite:
+  cloud_firestore: ^4.13.3
   
 
 dev_dependencies:
@@ -62,6 +63,9 @@ flutter:
     - family: Bahnschrift
       fonts:
         - asset: fonts/bahnschrift.ttf
+    - family: Cambria
+      fonts:
+        - asset: fonts/cambria.ttc
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
