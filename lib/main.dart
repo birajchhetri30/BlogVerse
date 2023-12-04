@@ -1,5 +1,6 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'package:blogapp/current_user.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
@@ -31,6 +32,9 @@ void main() async {
       .get();
 
   debugPrint("USer: ${snapshot.data()}");
+  Map<String, dynamic> user = snapshot.data() as Map<String, dynamic>;
+  CurrentUser.fname = user['fname'];
+  CurrentUser.lname = user['lname'];
 
   runApp(const MyApp());
 }
