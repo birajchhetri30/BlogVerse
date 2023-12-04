@@ -34,8 +34,7 @@ void main() async {
 
     debugPrint("USer: ${snapshot.data()}");
     Map<String, dynamic> user = snapshot.data() as Map<String, dynamic>;
-    CurrentUser.fname = user['fname'];
-    CurrentUser.lname = user['lname'];
+    CurrentUser.onStart(fname: user['fname'], lname: user['lname']);
   }
 
   runApp(const MyApp());
@@ -182,5 +181,34 @@ class ReusableWidgets {
             ),
           );
         }).toList());
+  }
+
+  Widget createCard({required Map<String, dynamic> blog}) {
+    var theme = Theme.of(context);
+    var titleStyle = theme.textTheme.headlineMedium!;
+    var bodyStyle = theme.textTheme.bodyLarge!.copyWith(fontFamily: 'Cambria');
+
+    return Card(
+      color: theme.colorScheme.primary,
+      elevation: 10,
+      margin: const EdgeInsets.all(10),
+      child: Padding(
+        padding: const EdgeInsets.all(15.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              blog['title']!,
+              style: titleStyle,
+            ),
+            const SizedBox(height: 10),
+            Text(
+              blog['body']!,
+              style: bodyStyle,
+            )
+          ],
+        ),
+      ),
+    );
   }
 }
