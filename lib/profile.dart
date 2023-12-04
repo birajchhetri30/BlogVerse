@@ -1,6 +1,7 @@
 import 'package:blogapp/main.dart';
 import 'package:blogapp/login.dart';
 import 'package:flutter/material.dart';
+import 'package:blogapp/current_user.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -20,8 +21,6 @@ class _ProfileState extends State<Profile> {
 
   @override
   Widget build(BuildContext context) {
-    //setUserDetails();
-
     var theme = Theme.of(context);
     var reuse = ReusableWidgets(context);
 
@@ -38,7 +37,7 @@ class _ProfileState extends State<Profile> {
               toolbarHeight: 100,
               stretch: true,
               flexibleSpace: FlexibleSpaceBar(
-                title: Text("Hello Name", style: titleStyle),
+                title: Text("Hello ${CurrentUser.fname}", style: titleStyle),
                 centerTitle: false,
                 titlePadding: EdgeInsets.all(20),
                 stretchModes: [StretchMode.fadeTitle],
@@ -56,18 +55,9 @@ class _ProfileState extends State<Profile> {
     );
   }
 
-  void setUserDetails() async {
-    DocumentSnapshot userDetails = await FirebaseFirestore.instance
-        .collection("users")
-        .doc(currUser.email)
-        .get();
-
-    // setState(() {
-    //   user = json.decode((json.encode(userDetails.data())));
-    // });
-  }
-
   void logoutAccount() async {
+    CurrentUser.fname = "";
+    CurrentUser.lname = "";
     await FirebaseAuth.instance.signOut();
     Navigator.popUntil(context, (route) => route.isFirst);
     Navigator.pushReplacement(
