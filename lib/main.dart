@@ -26,15 +26,17 @@ void main() async {
   //   debugPrint("Id: ${doc.id}, Data: ${doc.data()}");
   // }
 
-  DocumentSnapshot snapshot = await FirebaseFirestore.instance
-      .collection("users")
-      .doc(FirebaseAuth.instance.currentUser!.email)
-      .get();
+  if (FirebaseAuth.instance.currentUser != null) {
+    DocumentSnapshot snapshot = await FirebaseFirestore.instance
+        .collection("users")
+        .doc(FirebaseAuth.instance.currentUser!.email)
+        .get();
 
-  debugPrint("USer: ${snapshot.data()}");
-  Map<String, dynamic> user = snapshot.data() as Map<String, dynamic>;
-  CurrentUser.fname = user['fname'];
-  CurrentUser.lname = user['lname'];
+    debugPrint("USer: ${snapshot.data()}");
+    Map<String, dynamic> user = snapshot.data() as Map<String, dynamic>;
+    CurrentUser.fname = user['fname'];
+    CurrentUser.lname = user['lname'];
+  }
 
   runApp(const MyApp());
 }
