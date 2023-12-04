@@ -2,6 +2,7 @@
 
 import 'package:blogapp/main.dart';
 import 'package:blogapp/home.dart';
+import 'package:blogapp/current_user.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -102,6 +103,15 @@ class _LoginState extends State<Login> {
             .signInWithEmailAndPassword(email: email, password: password);
 
         if (userCredential.user != null) {
+          DocumentSnapshot snapshot = await FirebaseFirestore.instance
+              .collection("users")
+              .doc(FirebaseAuth.instance.currentUser!.email)
+              .get();
+
+          debugPrint("USer: ${snapshot.data()}");
+          Map<String, dynamic> user = snapshot.data() as Map<String, dynamic>;
+          CurrentUser.fname = user['fname'];
+          CurrentUser.lname = user['lname'];
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => const Home()),
@@ -245,7 +255,6 @@ class _SignUpState extends State<SignUp> {
 
         Map<String, dynamic> newUser = {'fname': fname, 'lname': lname};
         FirebaseFirestore.instance.collection("users").doc(email).set(newUser);
-        
       } on FirebaseAuthException catch (ex) {
         var error = ex.code.toString();
         if (error == "email-already-in-use") {
