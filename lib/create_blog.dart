@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:blogapp/current_user.dart';
 
 class CreateBlog extends StatefulWidget {
   @override
@@ -15,37 +14,38 @@ class _CreateBlogState extends State<CreateBlog> {
     TextEditingController titleController = TextEditingController();
     TextEditingController bodyController = TextEditingController();
 
-    return Scaffold(
-      floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            Map<String, dynamic> blog = {
-              'title': titleController.text.trim(),
-              'body': bodyController.text.trim()
-            };
+    return Container(
+      color: theme.colorScheme.background,
+      child: Scaffold(
+        floatingActionButton: FloatingActionButton(
+            onPressed: () {
+              Map<String, String> blog = {
+                'title': titleController.text.trim(),
+                'body': bodyController.text.trim()
+              };
 
-            String email = FirebaseAuth.instance.currentUser!.email.toString();
-            FirebaseFirestore.instance
-                .collection("users")
-                .doc(email)
-                .collection("blogs")
-                .add(blog);
-
-            Navigator.pop(context);
-          },
-          shape: const CircleBorder(),
-          backgroundColor: theme.colorScheme.secondary,
-          child: const Icon(Icons.save, size: 35)),
-      body: SafeArea(
-        minimum: const EdgeInsets.only(left: 15, right: 15),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            createTextField(
-                controller: titleController, hintText: " Title", isTitle: true),
-            const SizedBox(height: 20),
-            createTextField(
-                controller: bodyController, hintText: " Start writing!")
-          ],
+              CurrentUser.addBlog(blog);
+              Navigator.pop(context);
+            },
+            shape: const CircleBorder(),
+            backgroundColor: theme.colorScheme.secondary,
+            child: const Icon(Icons.save, size: 35)),
+        body: SafeArea(
+          minimum: const EdgeInsets.only(left: 15, right: 15),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                createTextField(
+                    controller: titleController,
+                    hintText: " Title",
+                    isTitle: true),
+                const SizedBox(height: 20),
+                createTextField(
+                    controller: bodyController, hintText: " Start writing!")
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -67,6 +67,7 @@ class _CreateBlogState extends State<CreateBlog> {
       maxLines: null,
       style: textStyle,
       cursorColor: theme.colorScheme.secondary,
+      textInputAction: isTitle ? TextInputAction.next : null,
       textCapitalization:
           isTitle ? TextCapitalization.words : TextCapitalization.sentences,
       decoration: InputDecoration(
