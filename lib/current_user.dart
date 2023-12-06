@@ -8,6 +8,7 @@ class CurrentUser extends ChangeNotifier {
   static User? currUser;
   static int totalBlogs = 0;
   static List<Map<String, dynamic>> blogs = [];
+  static List<Map<String, dynamic>> feedBlogs = [];
 
   static late DocumentSnapshot? userSnapshot;
 
@@ -21,6 +22,7 @@ class CurrentUser extends ChangeNotifier {
     fname = userSnapshot!['fname'];
     lname = userSnapshot!['lname'];
 
+    fetchFeedBlogs();
     fetchBlogs();
   }
 
@@ -68,12 +70,38 @@ class CurrentUser extends ChangeNotifier {
     notifyListeners();
   }
 
+  static void fetchFeedBlogs() async {
+    QuerySnapshot snapshot =
+        await FirebaseFirestore.instance.collection("users").get();
+    for (var doc in snapshot.docs) {
+      if (doc.id != currUser?.email) {
+        QuerySnapshot feedBlogSnapshot = await FirebaseFirestore.instance
+            .collection("users")
+            .doc(doc.id)
+            .collection("blogs")
+            .get();
+        for (var blog in feedBlogSnapshot.docs) {
+          Map<String, String> blogMap = {
+            'title': blog['title'],
+            'body': blog['body']
+          };
+          feedBlogs.add(blogMap);
+        }
+      }
+    }
+  }
+
+  List<Map<String, dynamic>> getFeedBlogs() {
+    return feedBlogs;
+  }
+
   void reset() {
     fname = "";
     lname = "";
     currUser = null;
     totalBlogs = 0;
     blogs = [];
+    feedBlogs = [];
     userSnapshot = null;
 
     notifyListeners();
