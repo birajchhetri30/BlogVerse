@@ -103,15 +103,7 @@ class _LoginState extends State<Login> {
             .signInWithEmailAndPassword(email: email, password: password);
 
         if (userCredential.user != null) {
-          DocumentSnapshot snapshot = await FirebaseFirestore.instance
-              .collection("users")
-              .doc(FirebaseAuth.instance.currentUser!.email)
-              .get();
-
-          debugPrint("USer: ${snapshot.data()}");
-          Map<String, dynamic> user = snapshot.data() as Map<String, dynamic>;
-          CurrentUser.fname = user['fname'];
-          CurrentUser.lname = user['lname'];
+          CurrentUser.onStart();
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => const Home()),
