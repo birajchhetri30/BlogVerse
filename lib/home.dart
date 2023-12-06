@@ -7,14 +7,16 @@ import 'package:blogapp/search.dart';
 import 'package:blogapp/create_blog.dart';
 
 class Home extends StatefulWidget {
-  const Home({super.key});
+  const Home({super.key, required this.currPage});
+  final dynamic currPage;
 
   @override
-  State<Home> createState() => _HomeState();
+  State<Home> createState() => _HomeState(currPage: currPage);
 }
 
 class _HomeState extends State<Home> {
-  dynamic currPage = Feed();
+  _HomeState({required this.currPage});
+  dynamic currPage;
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +54,7 @@ class _HomeState extends State<Home> {
                     icon: const Icon(Icons.home_rounded),
                     onPressed: () {
                       setState(() {
-                        currPage = Feed();
+                        currPage = const Feed();
                       });
                     }),
                 reuse.createIconButton(
