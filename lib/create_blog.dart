@@ -1,5 +1,8 @@
+import 'package:blogapp/main.dart';
 import 'package:flutter/material.dart';
 import 'package:blogapp/current_user.dart';
+import 'package:provider/provider.dart';
+
 
 class CreateBlog extends StatefulWidget {
   @override
@@ -10,6 +13,8 @@ class _CreateBlogState extends State<CreateBlog> {
   @override
   Widget build(BuildContext context) {
     var theme = Theme.of(context);
+    var reuse = ReusableWidgets(context);
+    var appState = context.watch<CurrentUser>();
 
     TextEditingController titleController = TextEditingController();
     TextEditingController bodyController = TextEditingController();
@@ -24,7 +29,16 @@ class _CreateBlogState extends State<CreateBlog> {
                 'body': bodyController.text.trim()
               };
 
-              CurrentUser.addBlog(blog);
+              appState.addBlog(blog);
+              // showDialog(
+              //     context: context,
+              //     barrierDismissible: false,
+              //     builder: (BuildContext context) {
+              //       Future.delayed(Duration(seconds: 5), () {
+              //         Navigator.pop(context);
+              //       });
+              //       return reuse.showLoaderDialog();
+              //     });
               Navigator.pop(context);
             },
             shape: const CircleBorder(),
