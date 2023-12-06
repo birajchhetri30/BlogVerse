@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-class CurrentUser {
+class CurrentUser extends ChangeNotifier {
   static String fname = "";
   static String lname = "";
   static User currUser = FirebaseAuth.instance.currentUser!;
@@ -11,7 +11,7 @@ class CurrentUser {
 
   static late DocumentSnapshot userSnapshot;
 
-  static void onStart({required String fname, required String lname}) async {
+  void onStart({required String fname, required String lname}) async {
     CurrentUser.fname = fname;
     CurrentUser.lname = lname;
 
@@ -20,19 +20,21 @@ class CurrentUser {
         .doc(currUser.email)
         .get();
 
-    getBlogs();
+    fetchBlogs();
+    notifyListeners();
   }
 
-  static void reset() {
+  void reset() {
     fname = "";
     lname = "";
+    notifyListeners();
   }
 
   static void getDetails() async {
     //DocumentSnapshot
   }
 
-  static void getBlogs() async {
+  void fetchBlogs() async {
     QuerySnapshot blogSnapshot = await FirebaseFirestore.instance
         .collection("users")
         .doc(currUser.email)
@@ -43,9 +45,14 @@ class CurrentUser {
       Map<String, dynamic> blogMap = doc.data() as Map<String, dynamic>;
       blogs.add(blogMap);
     }
+    notifyListeners();
   }
 
-  static void addBlog(Map<String, String> newBlog) async {
+  List<Map<String, dynamic>> getBlogs() {
+    return blogs;
+  }
+
+  void addBlog(Map<String, String> newBlog) async {
     await FirebaseFirestore.instance
         .collection("users")
         .doc(currUser.email)
@@ -53,14 +60,18 @@ class CurrentUser {
         .doc(newBlog['title'])
         .set(newBlog);
     blogs.add(newBlog);
+
+    notifyListeners();
   }
 
-  static void updateBlog(Map<String, String> newBlog) async {
+  void updateBlog(Map<String, String> newBlog) async {
     await FirebaseFirestore.instance
         .collection("users")
         .doc(currUser.email)
         .collection("blogs")
         .doc(newBlog['title'])
         .update(newBlog);
+
+    notifyListeners();
   }
 }
