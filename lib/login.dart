@@ -1,5 +1,6 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'package:blogapp/feed.dart';
 import 'package:blogapp/main.dart';
 import 'package:blogapp/home.dart';
 import 'package:blogapp/current_user.dart';
@@ -99,14 +100,24 @@ class _LoginState extends State<Login> {
       reuse.createSnackBar(context, content: "Please fill all the fields");
     } else {
       try {
+        showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (context) {
+              return reuse.showLoaderDialog(loadingText: "Signing in");
+            });
+
         UserCredential userCredential = await FirebaseAuth.instance
             .signInWithEmailAndPassword(email: email, password: password);
 
         if (userCredential.user != null) {
           CurrentUser.onStart();
-          Navigator.pushReplacement(
+          await Future.delayed(const Duration(seconds: 3));
+          Navigator.pushAndRemoveUntil(
             context,
-            MaterialPageRoute(builder: (context) => const Home()),
+            MaterialPageRoute(
+                builder: (context) => const Home(currPage: Feed())),
+            (route) => false,
           );
         }
       } on FirebaseAuthException catch (ex) {
@@ -237,12 +248,26 @@ class _SignUpState extends State<SignUp> {
       reuse.createSnackBar(context, content: "Passwords do not match");
     } else {
       try {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) {
+            return reuse.showLoaderDialog(loadingText: "Creating account");
+          },
+        );
+
         UserCredential userCredential = await FirebaseAuth.instance
             .createUserWithEmailAndPassword(email: email, password: password);
+
         debugPrint('User created');
 
+        await Future.delayed(const Duration(seconds: 2));
+
         if (userCredential.user != null) {
-          Navigator.pop(context);
+          Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => const Login()),
+              (route) => false);
         }
 
         Map<String, dynamic> newUser = {'fname': fname, 'lname': lname};
