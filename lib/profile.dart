@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:provider/provider.dart';
 
@@ -25,68 +26,62 @@ class _ProfileState extends State<Profile> {
 
     var titleStyle = theme.textTheme.displayMedium!
         .copyWith(color: theme.colorScheme.onPrimary);
-    var textStyle = theme.textTheme.titleLarge!;
-    return NestedScrollView(
-      headerSliverBuilder: (context, innerBoxIsScrolled) {
-        return <Widget>[
-          SliverAppBar(
-            expandedHeight: 250,
-            floating: false,
-            pinned: true,
-            toolbarHeight: 80,
-            stretch: false,
-            backgroundColor: theme.colorScheme.background,
-            surfaceTintColor: theme.colorScheme.background,
-            flexibleSpace: Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                SizedBox(
-                  width: 300,
-                  child: FlexibleSpaceBar(
-                    title:
-                        Text("Hello ${CurrentUser.fname}", style: titleStyle),
-                    centerTitle: false,
-                    titlePadding: const EdgeInsets.all(20),
-                    //stretchModes: const [StretchMode.fadeTitle],
-                  ),
-                ),
-                const Spacer(),
-                Padding(
-                  padding: const EdgeInsets.all(15),
-                  child: reuse.createIconButton(
-                      icon: Icon(Icons.logout), onPressed: logoutAccount),
-                )
-              ],
-            ),
-          ),
-          SliverAppBar(
-            title: Padding(
-              padding: const EdgeInsets.only(left: 10.0),
-              child: Text("Your blogs", style: textStyle),
-            ),
-            centerTitle: false,
-            pinned: true,
-            backgroundColor: theme.colorScheme.background,
-            surfaceTintColor: theme.colorScheme.background,
-            toolbarHeight: 50,
-          )
-        ];
-      },
-      body: Container(
-        color: theme.colorScheme.background,
-        padding: const EdgeInsets.only(left: 10, right: 10),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: ListView(
+
+    return SafeArea(
+      child: NestedScrollView(
+        headerSliverBuilder: (context, innerBoxIsScrolled) {
+          return <Widget>[
+            SliverAppBar(
+              expandedHeight: 200,
+              floating: false,
+              pinned: false,
+              toolbarHeight: 100,
+              stretch: false,
+              backgroundColor: theme.colorScheme.background,
+              //surfaceTintColor: theme.colorScheme.background,
+              flexibleSpace: Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  for (var blog in appState.getBlogs())
-                    reuse.createCard(blog: blog)
+                  SizedBox(
+                    width: 300,
+                    child: FlexibleSpaceBar(
+                      title:
+                          Text("Hello ${CurrentUser.fname}", style: titleStyle),
+                      centerTitle: false,
+                      titlePadding: const EdgeInsets.all(20),
+                     // stretchModes: const [StretchMode.fadeTitle],
+                    ),
+                  ),
+                  const Spacer(),
+                  Padding(
+                    padding: const EdgeInsets.all(15),
+                    child: reuse.createIconButton(
+                        icon: Icon(Icons.logout), onPressed: logoutAccount),
+                  )
                 ],
               ),
             ),
-          ],
+            SliverPersistentHeader(
+                delegate: CustomSliverDelegate(title: "Your blogs"),
+                pinned: true),
+          ];
+        },
+        body: Container(
+          color: theme.colorScheme.background,
+          padding: const EdgeInsets.only(left: 10, right: 10),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: ListView(
+                  children: [
+                    for (var blog in appState.getBlogs())
+                      reuse.createCard(blog: blog)
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -100,35 +95,53 @@ class _ProfileState extends State<Profile> {
   }
 }
 
-class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
-  _SliverAppBarDelegate(this._text);
+class CustomSliverDelegate extends SliverPersistentHeaderDelegate {
+  final String title;
+  final double topSafeArea;
+  final double maxExtent;
 
-  final Text _text;
-
-  @override
-  double get minExtent => 31;
-
-  @override
-  double get maxExtent => 31;
+  CustomSliverDelegate({
+    required this.title,
+    this.maxExtent = 56,
+    this.topSafeArea = 0,
+  });
 
   @override
   Widget build(
       BuildContext context, double shrinkOffset, bool overlapsContent) {
     var theme = Theme.of(context);
-    return SizedBox(
-      height: 50,
-      child: Container(
-        color: theme.colorScheme.background,
-        child: Padding(
-          padding: const EdgeInsets.only(left: 25),
-          child: _text,
+    var textStyle = theme.textTheme.titleLarge!;
+
+    return Theme(
+      data: ThemeData.dark(),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(minHeight: maxExtent),
+        child: Stack(
+          children: [
+            AppBar(
+              title: Padding(
+                padding: const EdgeInsets.only(left: 8),
+                child: Text(title, style: textStyle),
+              ),
+              backgroundColor: theme.colorScheme.background,
+              //surfaceTintColor: theme.colorScheme.primary,
+              elevation: 0,
+            ),
+          ],
         ),
       ),
     );
   }
 
   @override
-  bool shouldRebuild(_SliverAppBarDelegate oldDelegate) {
-    return false;
+  OverScrollHeaderStretchConfiguration get stretchConfiguration =>
+      OverScrollHeaderStretchConfiguration();
+
+  @override
+  double get minExtent => kToolbarHeight + topSafeArea;
+
+  @override
+  bool shouldRebuild(SliverPersistentHeaderDelegate oldDelegate) {
+    return true;
   }
 }
