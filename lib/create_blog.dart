@@ -1,10 +1,13 @@
+import 'package:blogapp/home.dart';
 import 'package:blogapp/main.dart';
+import 'package:blogapp/profile.dart';
 import 'package:flutter/material.dart';
 import 'package:blogapp/current_user.dart';
 import 'package:provider/provider.dart';
 
-
 class CreateBlog extends StatefulWidget {
+  const CreateBlog({super.key});
+
   @override
   State<CreateBlog> createState() => _CreateBlogState();
 }
@@ -23,23 +26,28 @@ class _CreateBlogState extends State<CreateBlog> {
       color: theme.colorScheme.background,
       child: Scaffold(
         floatingActionButton: FloatingActionButton(
-            onPressed: () {
+            onPressed: () async {
               Map<String, String> blog = {
                 'title': titleController.text.trim(),
                 'body': bodyController.text.trim()
               };
 
+              showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (BuildContext context) {
+                    return reuse.showLoaderDialog(
+                        loadingText: "Publishing your blog");
+                  });
+
               appState.addBlog(blog);
-              // showDialog(
-              //     context: context,
-              //     barrierDismissible: false,
-              //     builder: (BuildContext context) {
-              //       Future.delayed(Duration(seconds: 5), () {
-              //         Navigator.pop(context);
-              //       });
-              //       return reuse.showLoaderDialog();
-              //     });
-              Navigator.pop(context);
+
+              await Future.delayed(const Duration(seconds: 3));
+
+              Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(builder: (context) => const Home(currPage: Profile())),
+                  (route) => false);
             },
             shape: const CircleBorder(),
             backgroundColor: theme.colorScheme.secondary,
