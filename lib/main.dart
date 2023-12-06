@@ -1,12 +1,12 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'package:blogapp/feed.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:provider/provider.dart';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -51,7 +51,7 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         theme: CustomTheme().getTheme(),
         home: (FirebaseAuth.instance.currentUser != null)
-            ? const Home()
+            ? const Home(currPage: Feed())
             : const Login(),
       ),
     );
@@ -211,16 +211,31 @@ class ReusableWidgets {
     );
   }
 
-  Widget showLoaderDialog() {
+  Widget showLoaderDialog({required String loadingText}) {
     var theme = Theme.of(context);
 
     return Dialog(
         backgroundColor: theme.colorScheme.primary,
-        child: const Padding(
-            padding: EdgeInsets.all(15),
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+            side: BorderSide(color: theme.colorScheme.onPrimary),
+            borderRadius: BorderRadius.circular(10)),
+        child: Padding(
+            padding: const EdgeInsets.all(15),
             child: Column(
               mainAxisSize: MainAxisSize.min,
-              children: [CircularProgressIndicator(), Text("Loading...")],
+              children: [
+                CircularProgressIndicator(
+                  color: theme.colorScheme.onPrimary,
+                ),
+                const SizedBox(
+                  height: 20,
+                ),
+                Text(
+                  loadingText,
+                  style: TextStyle(color: theme.colorScheme.onPrimary),
+                )
+              ],
             )));
   }
 }
