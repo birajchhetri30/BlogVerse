@@ -5,39 +5,33 @@ import 'package:flutter/material.dart';
 class CurrentUser extends ChangeNotifier {
   static String fname = "";
   static String lname = "";
-  static User currUser = FirebaseAuth.instance.currentUser!;
+  static User? currUser;
   static int totalBlogs = 0;
   static List<Map<String, dynamic>> blogs = [];
 
-  static late DocumentSnapshot userSnapshot;
+  static late DocumentSnapshot? userSnapshot;
 
-  void onStart({required String fname, required String lname}) async {
-    CurrentUser.fname = fname;
-    CurrentUser.lname = lname;
-
+  static void onStart() async {
+    currUser = FirebaseAuth.instance.currentUser!;
     userSnapshot = await FirebaseFirestore.instance
         .collection("users")
-        .doc(currUser.email)
+        .doc(currUser?.email)
         .get();
 
-    fetchBlogs();
-    notifyListeners();
-  }
+    fname = userSnapshot!['fname'];
+    lname = userSnapshot!['lname'];
 
-  void reset() {
-    fname = "";
-    lname = "";
-    notifyListeners();
+    fetchBlogs();
   }
 
   static void getDetails() async {
     //DocumentSnapshot
   }
 
-  void fetchBlogs() async {
+  static void fetchBlogs() async {
     QuerySnapshot blogSnapshot = await FirebaseFirestore.instance
         .collection("users")
-        .doc(currUser.email)
+        .doc(currUser?.email)
         .collection("blogs")
         .get();
 
@@ -45,7 +39,6 @@ class CurrentUser extends ChangeNotifier {
       Map<String, dynamic> blogMap = doc.data() as Map<String, dynamic>;
       blogs.add(blogMap);
     }
-    notifyListeners();
   }
 
   List<Map<String, dynamic>> getBlogs() {
@@ -55,7 +48,7 @@ class CurrentUser extends ChangeNotifier {
   void addBlog(Map<String, String> newBlog) async {
     await FirebaseFirestore.instance
         .collection("users")
-        .doc(currUser.email)
+        .doc(currUser?.email)
         .collection("blogs")
         .doc(newBlog['title'])
         .set(newBlog);
@@ -67,10 +60,21 @@ class CurrentUser extends ChangeNotifier {
   void updateBlog(Map<String, String> newBlog) async {
     await FirebaseFirestore.instance
         .collection("users")
-        .doc(currUser.email)
+        .doc(currUser?.email)
         .collection("blogs")
         .doc(newBlog['title'])
         .update(newBlog);
+
+    notifyListeners();
+  }
+
+  void reset() {
+    fname = "";
+    lname = "";
+    currUser = null;
+    totalBlogs = 0;
+    blogs = [];
+    userSnapshot = null;
 
     notifyListeners();
   }

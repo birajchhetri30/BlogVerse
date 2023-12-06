@@ -1,14 +1,17 @@
 // ignore_for_file: use_build_context_synchronously
 
-import 'package:blogapp/current_user.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_phoenix/flutter_phoenix.dart';
+import 'package:provider/provider.dart';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/services.dart';
 import 'firebase_options.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-import 'package:flutter/material.dart';
+import 'package:blogapp/current_user.dart';
 import 'package:blogapp/login.dart';
 import 'package:blogapp/theme.dart';
 import 'package:blogapp/home.dart';
@@ -19,25 +22,17 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
+  if (FirebaseAuth.instance.currentUser != null) {
+    CurrentUser.onStart();
+  }
+
   // QuerySnapshot snapshot =
   //     await FirebaseFirestore.instance.collection("users").get();
 
   // for (var doc in snapshot.docs) {
   //   debugPrint("Id: ${doc.id}, Data: ${doc.data()}");
   // }
-
-  if (FirebaseAuth.instance.currentUser != null) {
-    DocumentSnapshot snapshot = await FirebaseFirestore.instance
-        .collection("users")
-        .doc(FirebaseAuth.instance.currentUser!.email)
-        .get();
-
-    debugPrint("USer: ${snapshot.data()}");
-    Map<String, dynamic> user = snapshot.data() as Map<String, dynamic>;
-    CurrentUser.onStart(fname: user['fname'], lname: user['lname']);
-  }
-
-  runApp(const MyApp());
+  runApp(Phoenix(child: const MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -49,13 +44,16 @@ class MyApp extends StatelessWidget {
       systemNavigationBarColor: CustomTheme().getTheme().colorScheme.primary,
     );
     SystemChrome.setSystemUIOverlayStyle(systemTheme);
-    return MaterialApp(
-      title: 'Flutter Demo',
-      debugShowCheckedModeBanner: false,
-      theme: CustomTheme().getTheme(),
-      home: (FirebaseAuth.instance.currentUser != null)
-          ? const Home()
-          : const Login(),
+    return ChangeNotifierProvider(
+      create: (context) => CurrentUser(),
+      child: MaterialApp(
+        title: 'Flutter Demo',
+        debugShowCheckedModeBanner: false,
+        theme: CustomTheme().getTheme(),
+        home: (FirebaseAuth.instance.currentUser != null)
+            ? const Home()
+            : const Login(),
+      ),
     );
   }
 }
@@ -185,12 +183,13 @@ class ReusableWidgets {
 
   Widget createCard({required Map<String, dynamic> blog}) {
     var theme = Theme.of(context);
+
     var titleStyle = theme.textTheme.headlineMedium!;
     var bodyStyle = theme.textTheme.bodyLarge!.copyWith(fontFamily: 'Cambria');
 
     return Card(
       color: theme.colorScheme.primary,
-      elevation: 10,
+      elevation: 5,
       margin: const EdgeInsets.all(10),
       child: Padding(
         padding: const EdgeInsets.all(15.0),
@@ -210,5 +209,18 @@ class ReusableWidgets {
         ),
       ),
     );
+  }
+
+  Widget showLoaderDialog() {
+    var theme = Theme.of(context);
+
+    return Dialog(
+        backgroundColor: theme.colorScheme.primary,
+        child: const Padding(
+            padding: EdgeInsets.all(15),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [CircularProgressIndicator(), Text("Loading...")],
+            )));
   }
 }

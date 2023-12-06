@@ -1,10 +1,11 @@
-import 'package:blogapp/main.dart';
-import 'package:blogapp/login.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_phoenix/flutter_phoenix.dart';
+import 'package:provider/provider.dart';
+
+import 'package:blogapp/main.dart';
 import 'package:blogapp/current_user.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Profile extends StatefulWidget {
   const Profile({super.key});
@@ -15,11 +16,11 @@ class Profile extends StatefulWidget {
 
 class _ProfileState extends State<Profile> {
   var currUser = FirebaseAuth.instance.currentUser!;
-  Map<String, dynamic> user = {};
 
   @override
   Widget build(BuildContext context) {
     var theme = Theme.of(context);
+    var appState = context.watch<CurrentUser>();
     var reuse = ReusableWidgets(context);
 
     var titleStyle = theme.textTheme.displayMedium!
@@ -32,7 +33,7 @@ class _ProfileState extends State<Profile> {
             expandedHeight: 250,
             floating: false,
             pinned: true,
-            toolbarHeight: 100,
+            toolbarHeight: 80,
             stretch: false,
             backgroundColor: theme.colorScheme.background,
             surfaceTintColor: theme.colorScheme.background,
@@ -80,7 +81,7 @@ class _ProfileState extends State<Profile> {
             Expanded(
               child: ListView(
                 children: [
-                  for (var blog in CurrentUser.blogs)
+                  for (var blog in appState.getBlogs())
                     reuse.createCard(blog: blog)
                 ],
               ),
@@ -92,12 +93,10 @@ class _ProfileState extends State<Profile> {
   }
 
   void logoutAccount() async {
-    CurrentUser.reset();
-
+    var appState = Provider.of<CurrentUser>(context, listen: false);
+    appState.reset();
     await FirebaseAuth.instance.signOut();
-    Navigator.popUntil(context, (route) => route.isFirst);
-    Navigator.pushReplacement(
-        context, MaterialPageRoute(builder: (context) => const Login()));
+    Phoenix.rebirth(context);
   }
 }
 
