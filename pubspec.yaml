@@ -39,6 +39,7 @@ dependencies:
   sqflite:
   cloud_firestore: ^4.13.3
   provider: ^6.0.0
+  flutter_phoenix: ^1.0.0
   
 
 dev_dependencies:
