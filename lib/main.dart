@@ -1,6 +1,7 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:blogapp/feed.dart';
+import 'package:blogapp/view_blog.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -181,31 +182,73 @@ class ReusableWidgets {
         }).toList());
   }
 
-  Widget createCard({required Map<String, dynamic> blog}) {
+  Widget createCard(
+      {required Map<String, dynamic> blog, required void Function() onLiked}) {
     var theme = Theme.of(context);
 
     var titleStyle = theme.textTheme.headlineMedium!;
     var bodyStyle = theme.textTheme.bodyLarge!.copyWith(fontFamily: 'Cambria');
+    String shortBlog = blog['body']!.toString().replaceAll("\n", " ");
 
-    return Card(
-      color: theme.colorScheme.primary,
-      elevation: 5,
-      margin: const EdgeInsets.all(10),
-      child: Padding(
-        padding: const EdgeInsets.all(15.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              blog['title']!,
-              style: titleStyle,
-            ),
-            const SizedBox(height: 10),
-            Text(
-              blog['body']!,
-              style: bodyStyle,
-            )
-          ],
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(context,
+            MaterialPageRoute(builder: (context) => ViewBlog(blog: blog)));
+      },
+      child: Card(
+        color: theme.colorScheme.primary,
+        elevation: 5,
+        margin: const EdgeInsets.all(10),
+        child: Padding(
+          padding: const EdgeInsets.all(15.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                blog['title']!,
+                style: titleStyle,
+              ),
+              const SizedBox(height: 10),
+              Container(
+                constraints: const BoxConstraints(maxHeight: 50),
+                child: RichText(
+                    text: TextSpan(
+                  style: bodyStyle,
+                  children: blog['body']!.toString().length > 65
+                      ? <TextSpan>[
+                          TextSpan(
+                              text:
+                                  "${shortBlog.toString().substring(0, 65)}..."),
+                          TextSpan(
+                              text: " read more",
+                              style: TextStyle(
+                                  color: theme.colorScheme.onBackground))
+                        ]
+                      : <TextSpan>[TextSpan(text: blog['body'])],
+                )),
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Container(
+                    padding: EdgeInsets.zero,
+                    width: 40,
+                    child: IconButton(
+                      onPressed: onLiked,
+                      icon: const Icon(Icons.favorite_outline),
+                      splashColor: Colors.transparent,
+                      highlightColor: Colors.transparent,
+                      style: IconButton.styleFrom(),
+                    ),
+                  ),
+                  Text(
+                    blog['likes'].toString(),
+                    style: theme.textTheme.bodyMedium!,
+                  ),
+                ],
+              )
+            ],
+          ),
         ),
       ),
     );
