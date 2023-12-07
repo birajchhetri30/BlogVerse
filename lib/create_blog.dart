@@ -27,27 +27,35 @@ class _CreateBlogState extends State<CreateBlog> {
       child: Scaffold(
         floatingActionButton: FloatingActionButton(
             onPressed: () async {
-              Map<String, String> blog = {
+              Map<String, dynamic> blog = {
                 'title': titleController.text.trim(),
-                'body': bodyController.text.trim()
+                'body': bodyController.text.trim(),
+                'likes': 0
               };
 
-              showDialog(
-                  context: context,
-                  barrierDismissible: false,
-                  builder: (BuildContext context) {
-                    return reuse.showLoaderDialog(
-                        loadingText: "Publishing your blog");
-                  });
+              bool exists = appState.checkBlogExists(blog['title']);
+              if (exists) {
+                reuse.createSnackBar(context,
+                    content: "That blog title already exists");
+              } else {
+                showDialog(
+                    context: context,
+                    barrierDismissible: false,
+                    builder: (BuildContext context) {
+                      return reuse.showLoaderDialog(
+                          loadingText: "Publishing your blog");
+                    });
 
-              appState.addBlog(blog);
+                appState.addBlog(blog);
 
-              await Future.delayed(const Duration(seconds: 3));
+                await Future.delayed(const Duration(seconds: 3));
 
-              Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(builder: (context) => const Home(currPage: Profile())),
-                  (route) => false);
+                Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const Home(currPage: Profile())),
+                    (route) => false);
+              }
             },
             shape: const CircleBorder(),
             backgroundColor: theme.colorScheme.secondary,
