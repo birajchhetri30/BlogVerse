@@ -29,7 +29,17 @@ class _FeedState extends State<Feed> {
       body: ListView(
         padding: const EdgeInsets.only(top: 8, bottom: 30),
         children: [
-          for (var blog in appState.getFeedBlogs()) reuse.createCard(blog: blog)
+          for (var blog in appState.getFeedBlogs())
+            reuse.createCard(
+                blog: blog,
+                onLiked: () {
+                  Map<String, dynamic> newBlog = {
+                    'title': blog['title'],
+                    'body': blog['body'],
+                    'likes': blog['likes'] + 1
+                  };
+                  appState.updateLikeCount(newBlog, blog['email']);
+                })
         ],
       ),
     );
