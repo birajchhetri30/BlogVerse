@@ -24,6 +24,7 @@ void main() async {
 
   if (FirebaseAuth.instance.currentUser != null) {
     CurrentUser.onStart();
+    await Future.delayed(const Duration(seconds: 3));
   }
 
   // QuerySnapshot snapshot =
@@ -121,17 +122,16 @@ class ReusableWidgets {
         child: Text(buttonText, style: textStyle));
   }
 
-  Widget createIconButton({required Icon icon, required Function() onPressed}) {
+  Widget createIconButton(
+      {required Icon icon,
+      required bool isSelected,
+      required Function() onPressed}) {
     var theme = Theme.of(context);
-    var isSelected = false;
     return IconButton(
       onPressed: onPressed,
       icon: icon,
       isSelected: isSelected,
-      selectedIcon: Icon(
-        icon.icon,
-        color: theme.colorScheme.secondary,
-      ),
+      selectedIcon: Icon(icon.icon, color: theme.colorScheme.secondary),
       iconSize: 35,
     );
   }

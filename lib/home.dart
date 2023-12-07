@@ -17,6 +17,7 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   _HomeState({required this.currPage});
   dynamic currPage;
+  var iconButtonColor = Colors.white;
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +34,7 @@ class _HomeState extends State<Home> {
             child: FloatingActionButton(
               onPressed: () {
                 Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => CreateBlog()));
+                    MaterialPageRoute(builder: (context) => const CreateBlog()));
               },
               shape: const CircleBorder(),
               elevation: 10,
@@ -51,32 +52,36 @@ class _HomeState extends State<Home> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 reuse.createIconButton(
-                    icon: const Icon(Icons.home_rounded),
+                    icon: const Icon(Icons.home),
+                    isSelected: currPage.toString() == "Feed",
                     onPressed: () {
                       setState(() {
                         currPage = const Feed();
                       });
                     }),
                 reuse.createIconButton(
-                    icon: Icon(Icons.notifications),
+                    icon: const Icon(Icons.notifications),
+                    isSelected: currPage.toString() == "Notifications",
                     onPressed: () {
                       setState(() {
-                        currPage = Notifications();
+                        currPage = const Notifications();
                       });
                     }),
                 const SizedBox(width: 50),
                 reuse.createIconButton(
-                    icon: Icon(Icons.search),
+                    icon: const Icon(Icons.search),
+                    isSelected: currPage.toString() == "Search",
                     onPressed: () {
                       setState(() {
-                        currPage = Search();
+                        currPage = const Search();
                       });
                     }),
                 reuse.createIconButton(
-                    icon: Icon(Icons.person),
+                    icon: const Icon(Icons.person),
+                    isSelected: currPage.toString() == "Profile",
                     onPressed: () {
                       setState(() {
-                        currPage = Profile();
+                        currPage = const Profile();
                       });
                     }),
               ],
