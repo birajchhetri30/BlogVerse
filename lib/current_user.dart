@@ -26,10 +26,6 @@ class CurrentUser extends ChangeNotifier {
     fetchBlogs();
   }
 
-  static void getDetails() async {
-    //DocumentSnapshot
-  }
-
   static void fetchBlogs() async {
     QuerySnapshot blogSnapshot = await FirebaseFirestore.instance
         .collection("users")
@@ -47,7 +43,7 @@ class CurrentUser extends ChangeNotifier {
     return blogs;
   }
 
-  void addBlog(Map<String, String> newBlog) async {
+  void addBlog(Map<String, dynamic> newBlog) async {
     await FirebaseFirestore.instance
         .collection("users")
         .doc(currUser?.email)
@@ -59,7 +55,7 @@ class CurrentUser extends ChangeNotifier {
     notifyListeners();
   }
 
-  void updateBlog(Map<String, String> newBlog) async {
+  void updateBlog(Map<String, dynamic> newBlog) async {
     await FirebaseFirestore.instance
         .collection("users")
         .doc(currUser?.email)
@@ -67,6 +63,30 @@ class CurrentUser extends ChangeNotifier {
         .doc(newBlog['title'])
         .update(newBlog);
 
+    notifyListeners();
+  }
+
+  void updateLikeCount(Map<String, dynamic> blog, String email) async {
+    if (email == currUser?.email) {
+      for (var each in blogs) {
+        if (each['title'] == blog['title']) {
+          each['likes'] += 1;
+        }
+      }
+    } else {
+      for (var each in feedBlogs) {
+        if (each['title'] == blog['title']) {
+          each['likes'] += 1;
+        }
+      }
+    }
+    await FirebaseFirestore.instance
+        .collection("users")
+        .doc(email)
+        .collection("blogs")
+        .doc(blog['title'])
+        .update(blog);
+    debugPrint('Success');
     notifyListeners();
   }
 
@@ -81,9 +101,12 @@ class CurrentUser extends ChangeNotifier {
             .collection("blogs")
             .get();
         for (var blog in feedBlogSnapshot.docs) {
-          Map<String, String> blogMap = {
+          Map<String, dynamic> blogMap = {
             'title': blog['title'],
-            'body': blog['body']
+            'body': blog['body'],
+            'likes': blog['likes'],
+            'email': doc.id,
+            'author': doc['fname'] + doc['lname']
           };
           feedBlogs.add(blogMap);
         }
@@ -93,6 +116,15 @@ class CurrentUser extends ChangeNotifier {
 
   List<Map<String, dynamic>> getFeedBlogs() {
     return feedBlogs;
+  }
+
+  bool checkBlogExists(String newBlogTitle) {
+    for (var each in blogs) {
+      if (newBlogTitle == each['title']) {
+        return true;
+      }
+    }
+    return false;
   }
 
   void reset() {
