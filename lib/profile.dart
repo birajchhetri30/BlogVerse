@@ -49,14 +49,16 @@ class _ProfileState extends State<Profile> {
                           Text("Hello ${CurrentUser.fname}", style: titleStyle),
                       centerTitle: false,
                       titlePadding: const EdgeInsets.all(20),
-                     // stretchModes: const [StretchMode.fadeTitle],
+                      // stretchModes: const [StretchMode.fadeTitle],
                     ),
                   ),
                   const Spacer(),
                   Padding(
                     padding: const EdgeInsets.all(15),
                     child: reuse.createIconButton(
-                        icon: Icon(Icons.logout), onPressed: logoutAccount),
+                        icon: Icon(Icons.logout),
+                        isSelected: false,
+                        onPressed: logoutAccount),
                   )
                 ],
               ),
@@ -74,9 +76,22 @@ class _ProfileState extends State<Profile> {
             children: [
               Expanded(
                 child: ListView(
+                  padding: const EdgeInsets.only(bottom: 30),
                   children: [
                     for (var blog in appState.getBlogs())
-                      reuse.createCard(blog: blog)
+                      reuse.createCard(
+                          blog: blog,
+                          onLiked: () {
+                            setState(() {
+                              Map<String, dynamic> newBlog = {
+                                'title': blog['title'],
+                                'body': blog['body'],
+                                'likes': blog['likes'] + 1
+                              };
+                              appState.updateLikeCount(
+                                  newBlog, currUser.email!);
+                            });
+                          })
                   ],
                 ),
               ),
