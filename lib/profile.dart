@@ -71,27 +71,35 @@ class _ProfileState extends State<Profile> {
         body: Container(
           color: theme.colorScheme.background,
           padding: const EdgeInsets.only(left: 10, right: 10),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: ListView(
-                  padding: const EdgeInsets.only(bottom: 30),
+          child: (appState.getBlogs().isNotEmpty)
+              ? Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    for (var blog in appState.getBlogs())
-                      reuse.createCard(
-                          blog: blog,
-                          isFeed: false,
-                          onLiked: () {
-                            setState(() {
-                              appState.updateLikeCount(blog: blog);
-                            });
-                          })
+                    Expanded(
+                      child: ListView(
+                        padding: const EdgeInsets.only(bottom: 30),
+                        children: [
+                          for (var blog in appState.getBlogs())
+                            reuse.createCard(
+                                blog: blog,
+                                isFeed: false,
+                                onLiked: () {
+                                  setState(() {
+                                    appState.updateLikeCount(blog: blog);
+                                  });
+                                })
+                        ],
+                      ),
+                    ),
                   ],
-                ),
-              ),
-            ],
-          ),
+                )
+              : Center(
+                  child: Text(
+                  "No blogs\ncreated",
+                  style: theme.textTheme.displaySmall!
+                      .copyWith(color: theme.colorScheme.onBackground),
+                  textAlign: TextAlign.center,
+                )),
         ),
       ),
     );
