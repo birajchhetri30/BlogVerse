@@ -9,6 +9,7 @@ class CurrentUser extends ChangeNotifier {
   static int totalBlogs = 0;
   static List<Map<String, dynamic>> blogs = [];
   static List<Map<String, dynamic>> feedBlogs = [];
+  static List<String> likedBlogs = [];
 
   static late DocumentSnapshot? userSnapshot;
 
@@ -24,6 +25,7 @@ class CurrentUser extends ChangeNotifier {
 
     fetchFeedBlogs();
     fetchBlogs();
+    fetchLikedBlogs();
   }
 
   static void fetchBlogs() async {
@@ -44,11 +46,12 @@ class CurrentUser extends ChangeNotifier {
   }
 
   void addBlog(Map<String, dynamic> newBlog) async {
+    debugPrint("new blogID: ${newBlog['id']}");
     await FirebaseFirestore.instance
         .collection("users")
         .doc(currUser?.email)
         .collection("blogs")
-        .doc(newBlog['title'])
+        .doc(newBlog['id'])
         .set(newBlog);
     blogs.add(newBlog);
 
@@ -60,34 +63,83 @@ class CurrentUser extends ChangeNotifier {
         .collection("users")
         .doc(currUser?.email)
         .collection("blogs")
-        .doc(newBlog['title'])
+        .doc(newBlog['id'])
         .update(newBlog);
 
     notifyListeners();
   }
 
-  void updateLikeCount(Map<String, dynamic> blog, String email) async {
-    if (email == currUser?.email) {
+  void updateLikeCount({
+    required Map<String, dynamic> blog,
+    String? email = "",
+  }) async {
+    Map<String, dynamic> updateBlog = {};
+    if (email == "") {
+      email = currUser?.email;
+      // current user's blog's likes
       for (var each in blogs) {
         if (each['title'] == blog['title']) {
-          each['likes'] += 1;
+          updateBlog = each;
+          if (!likedBlogs.contains(blog['id'])) {
+            each['likes'] += 1;
+            likedBlogs.add(blog['id']);
+          } else {
+            each['likes'] -= 1;
+            likedBlogs.remove(blog['id']);
+          }
+          break;
         }
       }
     } else {
+      // other user's blog's likes
       for (var each in feedBlogs) {
         if (each['title'] == blog['title']) {
-          each['likes'] += 1;
+          updateBlog = each;
+          if (!likedBlogs.contains(blog['id'])) {
+            debugPrint('Blog id to add: ${blog['id']}');
+            each['likes'] += 1;
+            likedBlogs.add(blog['id']);
+          } else {
+            each['likes'] -= 1;
+            likedBlogs.remove(blog['id']);
+          }
+          break;
         }
       }
     }
+
+    debugPrint("Liked blogs: $likedBlogs");
+
     await FirebaseFirestore.instance
         .collection("users")
         .doc(email)
         .collection("blogs")
-        .doc(blog['title'])
-        .update(blog);
+        .doc(blog['id'])
+        .update(updateBlog);
+
+    CollectionReference currLikedBlogs = FirebaseFirestore.instance
+        .collection("users")
+        .doc(currUser?.email)
+        .collection("likedBlogs");
+
+    QuerySnapshot currLikedBlogsSnapshot = await currLikedBlogs.get();
+
+    for (var doc in currLikedBlogsSnapshot.docs) {
+      doc.reference.delete();
+    }
+
+    for (var each in likedBlogs) {
+      currLikedBlogs.doc(each).set({'title': each});
+    }
     debugPrint('Success');
     notifyListeners();
+  }
+
+  bool blogIsLiked(String id) {
+    if (likedBlogs.contains(id)) {
+      return true;
+    }
+    return false;
   }
 
   static void fetchFeedBlogs() async {
@@ -102,11 +154,12 @@ class CurrentUser extends ChangeNotifier {
             .get();
         for (var blog in feedBlogSnapshot.docs) {
           Map<String, dynamic> blogMap = {
+            'id': blog['id'],
             'title': blog['title'],
             'body': blog['body'],
             'likes': blog['likes'],
             'email': doc.id,
-            'author': doc['fname'] + doc['lname']
+            'author': doc['fname'] + " " + doc['lname']
           };
           feedBlogs.add(blogMap);
         }
@@ -116,6 +169,18 @@ class CurrentUser extends ChangeNotifier {
 
   List<Map<String, dynamic>> getFeedBlogs() {
     return feedBlogs;
+  }
+
+  static void fetchLikedBlogs() async {
+    QuerySnapshot snapshot = await FirebaseFirestore.instance
+        .collection("users")
+        .doc(currUser?.email)
+        .collection("likedBlogs")
+        .get();
+
+    for (var doc in snapshot.docs) {
+      likedBlogs.add(doc['title']);
+    }
   }
 
   bool checkBlogExists(String newBlogTitle) {
@@ -134,6 +199,7 @@ class CurrentUser extends ChangeNotifier {
     totalBlogs = 0;
     blogs = [];
     feedBlogs = [];
+    likedBlogs = [];
     userSnapshot = null;
 
     notifyListeners();
