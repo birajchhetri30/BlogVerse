@@ -183,8 +183,10 @@ class ReusableWidgets {
   }
 
   Widget createCard(
-      {required Map<String, dynamic> blog, required void Function() onLiked}) {
+      {required Map<String, dynamic> blog,
+      required void Function() onLiked}) {
     var theme = Theme.of(context);
+    var appState = context.watch<CurrentUser>();
 
     var titleStyle = theme.textTheme.headlineMedium!;
     var bodyStyle = theme.textTheme.bodyLarge!.copyWith(fontFamily: 'Cambria');
@@ -238,6 +240,9 @@ class ReusableWidgets {
                       icon: const Icon(Icons.favorite_outline),
                       splashColor: Colors.transparent,
                       highlightColor: Colors.transparent,
+                      isSelected: appState.blogIsLiked(blog['id']),
+                      selectedIcon:
+                          const Icon(Icons.favorite, color: Colors.red),
                       style: IconButton.styleFrom(),
                     ),
                   ),
