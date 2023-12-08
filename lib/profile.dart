@@ -81,6 +81,7 @@ class _ProfileState extends State<Profile> {
                     for (var blog in appState.getBlogs())
                       reuse.createCard(
                           blog: blog,
+                          isFeed: false,
                           onLiked: () {
                             setState(() {
                               appState.updateLikeCount(blog: blog);
