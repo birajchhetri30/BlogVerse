@@ -33,12 +33,9 @@ class _FeedState extends State<Feed> {
             reuse.createCard(
                 blog: blog,
                 onLiked: () {
-                  Map<String, dynamic> newBlog = {
-                    'title': blog['title'],
-                    'body': blog['body'],
-                    'likes': blog['likes'] + 1
-                  };
-                  appState.updateLikeCount(newBlog, blog['email']);
+                  setState(() {
+                    appState.updateLikeCount(blog: blog, email: blog['email']);
+                  });
                 })
         ],
       ),
