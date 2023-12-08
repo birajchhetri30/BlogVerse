@@ -215,18 +215,16 @@ class ReusableWidgets {
               Container(
                   constraints: const BoxConstraints(maxHeight: 50),
                   child: Text(
-                    "${blog['body'].toString().substring(0, shortBlog + 1)}",
-                    style: theme.textTheme.bodyLarge!
-                        .copyWith(fontFamily: "Cambria"),
+                    blog['body'].toString().substring(0, shortBlog + 1),
+                    style: bodyStyle,
                   )),
               const SizedBox(
                 height: 10,
               ),
               Text(
                 'Read more',
-                style: theme.textTheme.bodyLarge!.copyWith(
-                    fontFamily: "Cambria",
-                    color: theme.colorScheme.onBackground),
+                style:
+                    bodyStyle.copyWith(color: theme.colorScheme.onBackground),
               ),
               const SizedBox(height: 10),
               Row(
