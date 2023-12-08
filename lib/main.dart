@@ -184,13 +184,14 @@ class ReusableWidgets {
 
   Widget createCard(
       {required Map<String, dynamic> blog,
-      required void Function() onLiked}) {
+      required void Function() onLiked,
+      bool isFeed = true}) {
     var theme = Theme.of(context);
     var appState = context.watch<CurrentUser>();
 
     var titleStyle = theme.textTheme.headlineMedium!;
     var bodyStyle = theme.textTheme.bodyLarge!.copyWith(fontFamily: 'Cambria');
-    String shortBlog = blog['body']!.toString().replaceAll("\n", " ");
+    int shortBlog = blog['body']!.toString().indexOf(".");
 
     return GestureDetector(
       onTap: () {
@@ -212,24 +213,22 @@ class ReusableWidgets {
               ),
               const SizedBox(height: 10),
               Container(
-                constraints: const BoxConstraints(maxHeight: 50),
-                child: RichText(
-                    text: TextSpan(
-                  style: bodyStyle,
-                  children: blog['body']!.toString().length > 65
-                      ? <TextSpan>[
-                          TextSpan(
-                              text:
-                                  "${shortBlog.toString().substring(0, 65)}..."),
-                          TextSpan(
-                              text: " read more",
-                              style: TextStyle(
-                                  color: theme.colorScheme.onBackground))
-                        ]
-                      : <TextSpan>[TextSpan(text: blog['body'])],
-                )),
+                  constraints: const BoxConstraints(maxHeight: 50),
+                  child: Text(
+                    "${blog['body'].toString().substring(0, shortBlog + 1)}",
+                    style: theme.textTheme.bodyLarge!
+                        .copyWith(fontFamily: "Cambria"),
+                  )),
+              const SizedBox(
+                height: 10,
               ),
-              const SizedBox(height: 20),
+              Text(
+                'Read more',
+                style: theme.textTheme.bodyLarge!.copyWith(
+                    fontFamily: "Cambria",
+                    color: theme.colorScheme.onBackground),
+              ),
+              const SizedBox(height: 10),
               Row(
                 children: [
                   Container(
@@ -250,6 +249,9 @@ class ReusableWidgets {
                     blog['likes'].toString(),
                     style: theme.textTheme.bodyMedium!,
                   ),
+                  Spacer(),
+                  if (blog['author'] != null && isFeed)
+                    Text("${blog['author']}")
                 ],
               )
             ],
