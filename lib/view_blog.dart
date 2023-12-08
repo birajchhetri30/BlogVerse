@@ -2,11 +2,16 @@ import 'package:blogapp/current_user.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class ViewBlog extends StatelessWidget {
+class ViewBlog extends StatefulWidget {
   const ViewBlog({super.key, required this.blog});
 
   final Map<String, dynamic> blog;
 
+  @override
+  State<ViewBlog> createState() => _ViewBlogState();
+}
+
+class _ViewBlogState extends State<ViewBlog> {
   @override
   Widget build(BuildContext context) {
     var theme = Theme.of(context);
@@ -36,7 +41,7 @@ class ViewBlog extends StatelessWidget {
                       width: 300,
                       child: FlexibleSpaceBar(
                         title: createDisplayText(context,
-                            content: blog['title'], isTitle: true),
+                            content: widget.blog['title'], isTitle: true),
                         centerTitle: false,
                         titlePadding: const EdgeInsets.all(20),
                         expandedTitleScale: 1.3,
@@ -50,22 +55,23 @@ class ViewBlog extends StatelessWidget {
                         width: 38,
                         child: IconButton(
                             onPressed: () {
-                              Map<String, dynamic> newBlog = {
-                                'title': blog['title'],
-                                'body': blog['body'],
-                                'likes': blog['likes'] + 1
-                              };
-                              var email = (blog['email'] == null)
-                                  ? CurrentUser.currUser?.email
-                                  : blog['email'];
-                              appState.updateLikeCount(blog: newBlog, email: email);
+                              var email = (widget.blog['email'] == null)
+                                  ? ""
+                                  : widget.blog['email'];
+                              setState(() {
+                                appState.updateLikeCount(
+                                    blog: widget.blog, email: email);
+                              });
                             },
-                            icon: Icon(Icons.favorite)),
+                            isSelected: appState.blogIsLiked(widget.blog['id']),
+                            selectedIcon:
+                                Icon(Icons.favorite, color: Colors.red),
+                            icon: Icon(Icons.favorite_outline)),
                       ),
                     ),
                     Padding(
                       padding: const EdgeInsets.only(bottom: 23, right: 15),
-                      child: Text(blog['likes'].toString()),
+                      child: Text(widget.blog['likes'].toString()),
                     )
                   ],
                 ),
@@ -83,7 +89,13 @@ class ViewBlog extends StatelessWidget {
                   const SizedBox(
                     height: 20,
                   ),
-                  createDisplayText(context, content: blog['body'])
+                  createDisplayText(context,
+                      content: (widget.blog['author'] != null)
+                          ? "Written by ${widget.blog['author']}"
+                          : "Written by ${CurrentUser.fname} ${CurrentUser.lname}",
+                      isHint: true),
+                  const SizedBox(height: 20),
+                  createDisplayText(context, content: widget.blog['body'])
                 ],
               ),
             ),
@@ -94,10 +106,13 @@ class ViewBlog extends StatelessWidget {
   }
 
   Widget createDisplayText(BuildContext context,
-      {required String content, isTitle = false}) {
+      {required String content, isTitle = false, isHint = false}) {
     var theme = Theme.of(context);
     var titleStyle = theme.textTheme.headlineSmall!;
-    var bodyStyle = theme.textTheme.bodyLarge!.copyWith(fontFamily: "Cambria");
+    var bodyStyle = theme.textTheme.bodyLarge!.copyWith(
+        fontFamily: isHint ? null : "Cambria",
+        fontStyle: isHint ? FontStyle.italic : null,
+        color: isHint ? theme.colorScheme.onBackground : null);
 
     var textStyle = isTitle ? titleStyle : bodyStyle;
 
