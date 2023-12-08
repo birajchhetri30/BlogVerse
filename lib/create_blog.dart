@@ -28,6 +28,7 @@ class _CreateBlogState extends State<CreateBlog> {
         floatingActionButton: FloatingActionButton(
             onPressed: () async {
               Map<String, dynamic> blog = {
+                'id': "${CurrentUser.currUser?.email}${titleController.text.trim()}",
                 'title': titleController.text.trim(),
                 'body': bodyController.text.trim(),
                 'likes': 0
@@ -36,7 +37,7 @@ class _CreateBlogState extends State<CreateBlog> {
               bool exists = appState.checkBlogExists(blog['title']);
               if (exists) {
                 reuse.createSnackBar(context,
-                    content: "That blog title already exists");
+                    content: "You already have a blog with that title");
               } else {
                 showDialog(
                     context: context,
