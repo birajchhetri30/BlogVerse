@@ -83,13 +83,7 @@ class _ProfileState extends State<Profile> {
                           blog: blog,
                           onLiked: () {
                             setState(() {
-                              Map<String, dynamic> newBlog = {
-                                'title': blog['title'],
-                                'body': blog['body'],
-                                'likes': blog['likes'] + 1
-                              };
-                              appState.updateLikeCount(
-                                  newBlog, currUser.email!);
+                              appState.updateLikeCount(blog: blog);
                             });
                           })
                   ],
