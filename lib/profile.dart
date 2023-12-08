@@ -70,7 +70,7 @@ class _ProfileState extends State<Profile> {
         },
         body: Container(
           color: theme.colorScheme.background,
-          padding: const EdgeInsets.only(left: 10, right: 10),
+          padding: const EdgeInsets.only(left: 0, right: 0),
           child: (appState.getBlogs().isNotEmpty)
               ? Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
