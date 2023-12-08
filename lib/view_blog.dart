@@ -58,7 +58,7 @@ class ViewBlog extends StatelessWidget {
                               var email = (blog['email'] == null)
                                   ? CurrentUser.currUser?.email
                                   : blog['email'];
-                              appState.updateLikeCount(newBlog, email);
+                              appState.updateLikeCount(blog: newBlog, email: email);
                             },
                             icon: Icon(Icons.favorite)),
                       ),
