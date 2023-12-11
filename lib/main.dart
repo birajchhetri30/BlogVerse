@@ -150,8 +150,7 @@ class ReusableWidgets {
         style: textStyle,
         textAlign: TextAlign.center,
       ),
-      backgroundColor:
-          (isError) ? theme.colorScheme.error : theme.colorScheme.secondary,
+      backgroundColor: (isError) ? theme.colorScheme.error : Colors.green,
       elevation: 2,
       duration: const Duration(seconds: 3),
     ));
