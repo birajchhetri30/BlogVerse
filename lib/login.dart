@@ -64,7 +64,70 @@ class _LoginState extends State<Login> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 TextButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      TextEditingController forgotPasswordController =
+                          TextEditingController();
+                      showDialog<void>(
+                          context: context,
+                          barrierDismissible: true,
+                          builder: ((context) {
+                            return AlertDialog(
+                              backgroundColor: theme.colorScheme.primary,
+                              elevation: 10,
+                              shape: RoundedRectangleBorder(
+                                  side: BorderSide(
+                                      color: theme.colorScheme.onPrimary),
+                                  borderRadius: BorderRadius.circular(10)),
+                              title: const Text("Reset password"),
+                              content: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Text(
+                                      "Enter the email address of the account to reset password."),
+                                  const SizedBox(height: 10),
+                                  reuse.createTextField(
+                                      controller: forgotPasswordController,
+                                      labelText: "Email"),
+                                ],
+                              ),
+                              actions: [
+                                reuse.createButton(
+                                    buttonText: "Proceed",
+                                    width: 120,
+                                    height: 50,
+                                    onPressed: () {
+                                      String email =
+                                          forgotPasswordController.text.trim();
+
+                                      if (email.isEmpty) {
+                                        reuse.createSnackBar(context,
+                                            content:
+                                                "Please provide an email address");
+                                      } else {
+                                        try {
+                                          FirebaseAuth.instance
+                                              .sendPasswordResetEmail(
+                                                  email: email);
+
+                                          Navigator.pop(context);
+
+                                          reuse.createSnackBar(context,
+                                              content:
+                                                  "Password reset mail sent",
+                                              isError: false);
+                                        } on FirebaseAuthException catch (e) {
+                                          var error = e.code.toString();
+                                          reuse.createSnackBar(context,
+                                              content: error);
+                                        }
+                                      }
+                                    })
+                              ],
+                            );
+                          }));
+
+                      //FirebaseAuth.instance.sendPasswordResetEmail(email: email)
+                    },
                     child: Text("Forgot password?", style: textButtonStyle)),
               ],
             ),
@@ -79,8 +142,10 @@ class _LoginState extends State<Login> {
                     style:
                         TextButton.styleFrom(padding: const EdgeInsets.all(1)),
                     onPressed: () {
-                      Navigator.push(context,
-                          MaterialPageRoute(builder: (context) => SignUp()));
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const SignUp()));
                     },
                     child: Text("Sign up", style: textButtonStyle)),
               ],
@@ -121,6 +186,7 @@ class _LoginState extends State<Login> {
           );
         }
       } on FirebaseAuthException catch (ex) {
+        Navigator.pop(context);
         var error = ex.code.toString();
 
         if (error == "invalid-email") {
