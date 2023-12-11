@@ -1,5 +1,6 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'package:blogapp/create_blog.dart';
 import 'package:blogapp/feed.dart';
 import 'package:blogapp/view_blog.dart';
 import 'package:flutter/cupertino.dart';
@@ -185,7 +186,8 @@ class ReusableWidgets {
   Widget createCard(
       {required Map<String, dynamic> blog,
       required void Function() onLiked,
-      bool isFeed = true}) {
+      bool isFeed = true,
+      bool isDraft = false}) {
     var theme = Theme.of(context);
     var appState = context.watch<CurrentUser>();
 
@@ -195,8 +197,13 @@ class ReusableWidgets {
 
     return GestureDetector(
       onTap: () {
-        Navigator.push(context,
-            MaterialPageRoute(builder: (context) => ViewBlog(blog: blog)));
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => isDraft
+                    ? CreateBlog(
+                        initialTitle: blog['title'], initialBody: blog['body'])
+                    : ViewBlog(blog: blog)));
       },
       child: Card(
         color: theme.colorScheme.primary,
@@ -229,25 +236,27 @@ class ReusableWidgets {
               const SizedBox(height: 10),
               Row(
                 children: [
-                  Container(
-                    padding: EdgeInsets.zero,
-                    width: 40,
-                    child: IconButton(
-                      onPressed: onLiked,
-                      icon: const Icon(Icons.favorite_outline),
-                      splashColor: Colors.transparent,
-                      highlightColor: Colors.transparent,
-                      isSelected: appState.blogIsLiked(blog['id']),
-                      selectedIcon:
-                          const Icon(Icons.favorite, color: Colors.red),
-                      style: IconButton.styleFrom(),
+                  if (!isDraft)
+                    Container(
+                      padding: EdgeInsets.zero,
+                      width: 40,
+                      child: IconButton(
+                        onPressed: onLiked,
+                        icon: const Icon(Icons.favorite_outline),
+                        splashColor: Colors.transparent,
+                        highlightColor: Colors.transparent,
+                        isSelected: appState.blogIsLiked(blog['id']),
+                        selectedIcon:
+                            const Icon(Icons.favorite, color: Colors.red),
+                        style: IconButton.styleFrom(),
+                      ),
                     ),
-                  ),
-                  Text(
-                    blog['likes'].toString(),
-                    style: theme.textTheme.bodyMedium!,
-                  ),
-                  Spacer(),
+                  if (!isDraft)
+                    Text(
+                      blog['likes'].toString(),
+                      style: theme.textTheme.bodyMedium!,
+                    ),
+                  const Spacer(),
                   if (blog['author'] != null && isFeed)
                     Text("${blog['author']}")
                 ],
