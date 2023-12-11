@@ -9,6 +9,7 @@ class CurrentUser extends ChangeNotifier {
   static int totalBlogs = 0;
   static List<Map<String, dynamic>> blogs = [];
   static List<Map<String, dynamic>> feedBlogs = [];
+  static List<Map<String, dynamic>> drafts = [];
   static List<String> likedBlogs = [];
 
   static late DocumentSnapshot? userSnapshot;
@@ -26,6 +27,7 @@ class CurrentUser extends ChangeNotifier {
     fetchFeedBlogs();
     fetchBlogs();
     fetchLikedBlogs();
+    fetchDrafts();
   }
 
   static void fetchBlogs() async {
@@ -67,6 +69,56 @@ class CurrentUser extends ChangeNotifier {
         .update(newBlog);
 
     notifyListeners();
+  }
+
+  void saveDraft(Map<String, dynamic> draft) async {
+    await FirebaseFirestore.instance
+        .collection("users")
+        .doc(currUser?.email)
+        .collection("drafts")
+        .doc(draft['id'])
+        .set(draft);
+    drafts.add(draft);
+
+    notifyListeners();
+  }
+
+  static void fetchDrafts() async {
+    QuerySnapshot snapshot = await FirebaseFirestore.instance
+        .collection("users")
+        .doc(currUser?.email)
+        .collection("drafts")
+        .get();
+
+    for (var doc in snapshot.docs) {
+      Map<String, dynamic> draft = doc.data() as Map<String, dynamic>;
+      drafts.add(draft);
+    }
+  }
+
+  void removeDraft(String draftTitle) async {
+    for (var draft in drafts) {
+      if (draft['title'] == draftTitle) {
+        drafts.remove(draft);
+        break;
+      }
+    }
+    QuerySnapshot snapshot = await FirebaseFirestore.instance
+        .collection("users")
+        .doc(currUser?.email)
+        .collection("drafts")
+        .get();
+
+    for (var doc in snapshot.docs) {
+      if (doc['title'] == draftTitle) {
+        doc.reference.delete();
+      }
+    }
+    notifyListeners();
+  }
+
+  List<Map<String, dynamic>> getDrafts() {
+    return drafts;
   }
 
   void updateLikeCount({
