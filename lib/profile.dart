@@ -1,3 +1,4 @@
+import 'package:blogapp/drafts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_phoenix/flutter_phoenix.dart';
@@ -38,25 +39,37 @@ class _ProfileState extends State<Profile> {
               toolbarHeight: 100,
               stretch: false,
               backgroundColor: theme.colorScheme.background,
-              //surfaceTintColor: theme.colorScheme.background,
               flexibleSpace: Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   SizedBox(
-                    width: 300,
+                    width: 250,
                     child: FlexibleSpaceBar(
                       title:
                           Text("Hello ${CurrentUser.fname}", style: titleStyle),
                       centerTitle: false,
-                      titlePadding: const EdgeInsets.all(20),
+                      titlePadding:
+                          const EdgeInsets.only(top: 20, bottom: 20, left: 20),
                       // stretchModes: const [StretchMode.fadeTitle],
                     ),
                   ),
                   const Spacer(),
                   Padding(
-                    padding: const EdgeInsets.all(15),
+                    padding: const EdgeInsets.only(bottom: 15),
                     child: reuse.createIconButton(
-                        icon: Icon(Icons.logout),
+                        icon: const Icon(Icons.edit),
+                        isSelected: false,
+                        onPressed: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => const Drafts()));
+                        }),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 15),
+                    child: reuse.createIconButton(
+                        icon: const Icon(Icons.logout),
                         isSelected: false,
                         onPressed: logoutAccount),
                   )
@@ -69,7 +82,6 @@ class _ProfileState extends State<Profile> {
           ];
         },
         body: Container(
-          color: theme.colorScheme.background,
           padding: const EdgeInsets.only(left: 0, right: 0),
           child: (appState.getBlogs().isNotEmpty)
               ? Column(
