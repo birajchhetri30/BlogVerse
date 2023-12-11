@@ -8,7 +8,10 @@ import 'package:provider/provider.dart';
 import 'dart:math' as math;
 
 class CreateBlog extends StatefulWidget {
-  const CreateBlog({super.key});
+  const CreateBlog({super.key, this.initialTitle, this.initialBody});
+
+  final String? initialTitle;
+  final String? initialBody;
 
   @override
   State<CreateBlog> createState() => _CreateBlogState();
@@ -40,7 +43,10 @@ class _CreateBlogState extends State<CreateBlog> {
     var appState = context.watch<CurrentUser>();
 
     TextEditingController titleController = TextEditingController();
+    titleController.text = widget.initialTitle ?? "";
+
     TextEditingController bodyController = TextEditingController();
+    bodyController.text = widget.initialBody ?? "";
 
     return Container(
       color: theme.colorScheme.background,
@@ -58,10 +64,9 @@ class _CreateBlogState extends State<CreateBlog> {
                   'likes': 0
                 };
 
-                bool exists = appState.checkBlogExists(draft['title']);
-                if (exists) {
+                if (titleController.text.isEmpty) {
                   reuse.createSnackBar(context,
-                      content: "You already have a blog with that title");
+                      content: "Title cannot be empty");
                 } else {
                   showDialog(
                       context: context,
@@ -72,6 +77,9 @@ class _CreateBlogState extends State<CreateBlog> {
                       });
 
                   appState.saveDraft(draft);
+                  if (widget.initialTitle != null) {
+                    appState.removeDraft(widget.initialTitle!);
+                  }
 
                   await Future.delayed(const Duration(seconds: 3));
 
@@ -99,8 +107,10 @@ class _CreateBlogState extends State<CreateBlog> {
                     'likes': 0
                   };
 
-                  bool exists = appState.checkBlogExists(blog['title']);
-                  if (exists) {
+                  if (titleController.text.isEmpty) {
+                    reuse.createSnackBar(context,
+                        content: "Title cannot be empty");
+                  } else if (appState.checkBlogExists(blog['title'])) {
                     reuse.createSnackBar(context,
                         content: "You already have a blog with that title");
                   } else if (!blog['body'].toString().contains(".")) {
@@ -116,6 +126,9 @@ class _CreateBlogState extends State<CreateBlog> {
                         });
 
                     appState.addBlog(blog);
+                    if (widget.initialTitle != null) {
+                      appState.removeDraft(widget.initialTitle!);
+                    }
 
                     await Future.delayed(const Duration(seconds: 3));
 
@@ -132,11 +145,6 @@ class _CreateBlogState extends State<CreateBlog> {
                 tooltip: "Publish blog")
           ],
         ),
-        // FloatingActionButton(
-        //     onPressed:
-        //     shape: const CircleBorder(),
-        //     backgroundColor: theme.colorScheme.secondary,
-        //     child: const Icon(Icons.save, size: 35)),
         body: SafeArea(
           minimum: const EdgeInsets.only(left: 15, right: 15),
           child: SingleChildScrollView(
@@ -161,7 +169,8 @@ class _CreateBlogState extends State<CreateBlog> {
   Widget createTextField(
       {required TextEditingController controller,
       required String hintText,
-      isTitle = false}) {
+      isTitle = false,
+      String? initialText}) {
     var theme = Theme.of(context);
     var titleStyle = theme.textTheme.displaySmall!;
     var bodyStyle = theme.textTheme.bodyLarge!.copyWith(fontFamily: "Cambria");
