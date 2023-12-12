@@ -1,5 +1,6 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'package:blogapp/account.dart';
 import 'package:blogapp/create_blog.dart';
 import 'package:blogapp/feed.dart';
 import 'package:blogapp/view_blog.dart';
@@ -257,7 +258,22 @@ class ReusableWidgets {
                     ),
                   const Spacer(),
                   if (blog['author'] != null && isFeed)
-                    Text("${blog['author']}")
+                    GestureDetector(
+                        onTap: () async {
+                          CurrentUser.fetchExtUserDetails(email: blog['email']);
+                          var name = blog['author'].toString().split(" ");
+                          Map<String, dynamic> user = {
+                            'email': blog['email'],
+                            'fname': name[0],
+                            'lname': name[1]
+                          };
+                          await Future.delayed(Duration(seconds: 3));
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => Account(user: user)));
+                        },
+                        child: Text("${blog['author']}"))
                 ],
               )
             ],
