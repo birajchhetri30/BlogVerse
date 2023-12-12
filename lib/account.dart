@@ -13,7 +13,6 @@ class Account extends StatefulWidget {
 }
 
 class _AccountState extends State<Account> {
-  String followText = "Follow";
   @override
   Widget build(BuildContext context) {
     var theme = Theme.of(context);
@@ -50,25 +49,31 @@ class _AccountState extends State<Account> {
                       child: ElevatedButton(
                           onPressed: () {
                             setState(() {
-                              if (followText == "Follow") {
-                                followText = "Following";
-                                userDetails['followers'] += 1;
-                              } else {
-                                followText = "Follow";
+                              if (appState.isFollowing(
+                                  email: widget.user['email'])) {
                                 userDetails['followers'] -= 1;
+                                appState.removeFollowing(
+                                    email: widget.user['email']);
+                              } else {
+                                userDetails['followers'] += 1;
+                                appState.addFollowing(widget.user);
                               }
                             });
                           },
                           style: ElevatedButton.styleFrom(
-                              backgroundColor: followText == "Follow"
+                              backgroundColor: !appState.isFollowing(
+                                      email: widget.user['email'])
                                   ? theme.colorScheme.secondary
                                   : Colors.transparent,
-                              side: followText == "Follow"
+                              side: !appState.isFollowing(
+                                      email: widget.user['email'])
                                   ? null
                                   : BorderSide(
                                       color: theme.colorScheme.secondary)),
                           child: Text(
-                            followText,
+                            appState.isFollowing(email: widget.user['email'])
+                                ? "Following"
+                                : "Follow",
                             style:
                                 TextStyle(color: theme.colorScheme.onSecondary),
                           )),
