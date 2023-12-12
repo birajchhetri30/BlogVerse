@@ -29,7 +29,7 @@ class _FeedState extends State<Feed> {
       ),
       body: LiquidPullToRefresh(
         onRefresh: () async {
-          appState.refresh;
+          appState.refresh();
         },
         showChildOpacityTransition: false,
         height: 70,

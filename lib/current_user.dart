@@ -221,7 +221,7 @@ class CurrentUser extends ChangeNotifier {
     }
   }
 
-  static void fetchFeedBlogs() async {
+  static Future<void> fetchFeedBlogs() async {
     QuerySnapshot snapshot =
         await FirebaseFirestore.instance.collection("users").get();
     for (var doc in snapshot.docs) {
@@ -387,11 +387,12 @@ class CurrentUser extends ChangeNotifier {
     return extUser;
   }
 
-  void refresh() {
+  Future<void> refresh() async {
     feedBlogs = [];
-    fetchFeedBlogs();
+    await fetchFeedBlogs();
     blogs = [];
     fetchBlogs();
+    debugPrint("Feed blogs: $feedBlogs");
     notifyListeners();
   }
 
