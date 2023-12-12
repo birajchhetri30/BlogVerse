@@ -100,7 +100,7 @@ class _ViewBlogState extends State<ViewBlog> {
                   const SizedBox(height: 20),
                   createDisplayText(context, content: widget.blog['body']),
                   const SizedBox(height: 40),
-                  if (widget.blog['author'] != null)
+                  if (widget.blog['email'] != CurrentUser.currUser?.email)
                     GestureDetector(
                         onTap: () async {
                           showDialog<void>(
