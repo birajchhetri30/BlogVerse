@@ -126,6 +126,7 @@ class CurrentUser extends ChangeNotifier {
     for (var doc in snapshot.docs) {
       if (doc['title'] == draftTitle) {
         doc.reference.delete();
+        break;
       }
     }
     notifyListeners();
@@ -273,6 +274,41 @@ class CurrentUser extends ChangeNotifier {
     notifyListeners();
   }
 
+  void removeFollowing({required String email}) async {
+    for (var acc in following) {
+      if (acc['email'] == email) {
+        following.remove(acc);
+        break;
+      }
+    }
+
+    QuerySnapshot snapshot = await FirebaseFirestore.instance
+        .collection("users")
+        .doc(currUser?.email)
+        .collection("following")
+        .get();
+
+    for (var doc in snapshot.docs) {
+      if (doc['email'] == email) {
+        doc.reference.delete();
+        break;
+      }
+    }
+
+    snapshot = await FirebaseFirestore.instance
+        .collection("users")
+        .doc(email)
+        .collection("followers")
+        .get();
+
+    for (var doc in snapshot.docs) {
+      if (doc['email'] == currUser?.email) {
+        doc.reference.delete();
+        break;
+      }
+    }
+  }
+
   static void fetchFollowers() async {
     QuerySnapshot snapshot = await FirebaseFirestore.instance
         .collection("users")
@@ -311,6 +347,15 @@ class CurrentUser extends ChangeNotifier {
       return following.length;
     }
     return following;
+  }
+
+  bool isFollowing({required String email}) {
+    for (var user in following) {
+      if (user['email'] == email) {
+        return true;
+      }
+    }
+    return false;
   }
 
   static void fetchExtUserDetails({required String email}) async {
