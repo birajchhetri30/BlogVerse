@@ -11,6 +11,9 @@ class CurrentUser extends ChangeNotifier {
   static List<Map<String, dynamic>> feedBlogs = [];
   static List<Map<String, dynamic>> drafts = [];
   static List<String> likedBlogs = [];
+  static List<Map<String, dynamic>> followers = [];
+  static List<Map<String, dynamic>> following = [];
+  static Map<String, dynamic> extUser = {};
 
   static late DocumentSnapshot? userSnapshot;
 
@@ -27,6 +30,8 @@ class CurrentUser extends ChangeNotifier {
     fetchFeedBlogs();
     fetchBlogs();
     fetchLikedBlogs();
+    fetchFollowers();
+    fetchFollowing();
     fetchDrafts();
   }
 
@@ -69,6 +74,15 @@ class CurrentUser extends ChangeNotifier {
         .update(newBlog);
 
     notifyListeners();
+  }
+
+  bool checkBlogExists(String newBlogTitle) {
+    for (var each in blogs) {
+      if (newBlogTitle == each['title']) {
+        return true;
+      }
+    }
+    return false;
   }
 
   void saveDraft(Map<String, dynamic> draft) async {
@@ -194,6 +208,18 @@ class CurrentUser extends ChangeNotifier {
     return false;
   }
 
+  static void fetchLikedBlogs() async {
+    QuerySnapshot snapshot = await FirebaseFirestore.instance
+        .collection("users")
+        .doc(currUser?.email)
+        .collection("likedBlogs")
+        .get();
+
+    for (var doc in snapshot.docs) {
+      likedBlogs.add(doc['title']);
+    }
+  }
+
   static void fetchFeedBlogs() async {
     QuerySnapshot snapshot =
         await FirebaseFirestore.instance.collection("users").get();
@@ -223,25 +249,97 @@ class CurrentUser extends ChangeNotifier {
     return feedBlogs;
   }
 
-  static void fetchLikedBlogs() async {
+  void addFollowing(Map<String, dynamic> acc) async {
+    await FirebaseFirestore.instance
+        .collection("users")
+        .doc(currUser?.email)
+        .collection("following")
+        .doc(acc['email'])
+        .set(acc);
+    following.add(acc);
+
+    Map<String, dynamic> currUserMap = {
+      'email': currUser?.email,
+      'fname': fname,
+      'lname': lname
+    };
+    await FirebaseFirestore.instance
+        .collection("users")
+        .doc(acc['email'])
+        .collection("followers")
+        .doc(currUser?.email)
+        .set(currUserMap);
+
+    notifyListeners();
+  }
+
+  static void fetchFollowers() async {
     QuerySnapshot snapshot = await FirebaseFirestore.instance
         .collection("users")
         .doc(currUser?.email)
-        .collection("likedBlogs")
+        .collection("followers")
         .get();
 
     for (var doc in snapshot.docs) {
-      likedBlogs.add(doc['title']);
+      Map<String, dynamic> acc = doc.data() as Map<String, dynamic>;
+      followers.add(acc);
     }
   }
 
-  bool checkBlogExists(String newBlogTitle) {
-    for (var each in blogs) {
-      if (newBlogTitle == each['title']) {
-        return true;
-      }
+  static void fetchFollowing() async {
+    QuerySnapshot snapshot = await FirebaseFirestore.instance
+        .collection("users")
+        .doc(currUser?.email)
+        .collection("following")
+        .get();
+
+    for (var doc in snapshot.docs) {
+      Map<String, dynamic> acc = doc.data() as Map<String, dynamic>;
+      following.add(acc);
     }
-    return false;
+  }
+
+  dynamic getFollowers({bool size = false}) {
+    if (size) {
+      return followers.length;
+    }
+    return followers;
+  }
+
+  dynamic getFollowing({bool size = false}) {
+    if (size) {
+      return following.length;
+    }
+    return following;
+  }
+
+  static void fetchExtUserDetails({required String email}) async {
+    DocumentReference user =
+        FirebaseFirestore.instance.collection("users").doc(email);
+
+    QuerySnapshot followerSnapshot = await user.collection("followers").get();
+    int followerCount = followerSnapshot.size;
+
+    QuerySnapshot followingSnapshot = await user.collection("following").get();
+    int followingCount = followingSnapshot.size;
+
+    List<Map<String, dynamic>> userBlogs = [];
+    QuerySnapshot snapshot = await user.collection("blogs").get();
+
+    for (var doc in snapshot.docs) {
+      Map<String, dynamic> blog = doc.data() as Map<String, dynamic>;
+      userBlogs.add(blog);
+    }
+
+    extUser = {
+      'followers': followerCount,
+      'following': followingCount,
+      'blogs': userBlogs
+    };
+  }
+
+  Map<String, dynamic> getExtUserDetails() {
+    return extUser;
   }
 
   void reset() {
@@ -253,6 +351,8 @@ class CurrentUser extends ChangeNotifier {
     feedBlogs = [];
     likedBlogs = [];
     userSnapshot = null;
+    followers = [];
+    following = [];
 
     notifyListeners();
   }
