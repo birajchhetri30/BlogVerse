@@ -1,4 +1,5 @@
 import 'package:blogapp/drafts.dart';
+import 'package:blogapp/follow.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_phoenix/flutter_phoenix.dart';
@@ -25,60 +26,96 @@ class _ProfileState extends State<Profile> {
     var appState = context.watch<CurrentUser>();
     var reuse = ReusableWidgets(context);
 
-    var titleStyle = theme.textTheme.displayMedium!
+    var titleStyle = theme.textTheme.headlineLarge!
         .copyWith(color: theme.colorScheme.onPrimary);
+    var textStyle = theme.textTheme.bodyLarge!;
+    var numberStyle = theme.textTheme.headlineLarge!;
 
     return SafeArea(
       child: NestedScrollView(
         headerSliverBuilder: (context, innerBoxIsScrolled) {
           return <Widget>[
             SliverAppBar(
-              expandedHeight: 200,
-              floating: false,
+              title: Text("${CurrentUser.fname} ${CurrentUser.lname}",
+                  style: titleStyle),
+              expandedHeight: 80,
+              floating: true,
               pinned: false,
-              toolbarHeight: 100,
+              toolbarHeight: 80,
               stretch: false,
               backgroundColor: theme.colorScheme.background,
-              flexibleSpace: Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
+              surfaceTintColor: theme.colorScheme.background,
+              actions: [
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 15),
+                  child: reuse.createIconButton(
+                      icon: const Icon(Icons.edit),
+                      isSelected: false,
+                      onPressed: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const Drafts()));
+                      }),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 15),
+                  child: reuse.createIconButton(
+                      icon: const Icon(Icons.logout),
+                      isSelected: false,
+                      onPressed: logoutAccount),
+                )
+              ],
+            ),
+            SliverAppBar(
+              toolbarHeight: 100,
+              expandedHeight: 100,
+              backgroundColor: theme.colorScheme.background,
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  SizedBox(
-                    width: 250,
-                    child: FlexibleSpaceBar(
-                      title:
-                          Text("Hello ${CurrentUser.fname}", style: titleStyle),
-                      centerTitle: false,
-                      titlePadding:
-                          const EdgeInsets.only(top: 20, bottom: 20, left: 20),
-                      // stretchModes: const [StretchMode.fadeTitle],
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const Follow()));
+                    },
+                    child: Column(
+                      children: [
+                        Text(appState.getFollowers(size: true).toString(),
+                            style: numberStyle),
+                        Text("Followers", style: textStyle),
+                      ],
                     ),
                   ),
-                  const Spacer(),
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 15),
-                    child: reuse.createIconButton(
-                        icon: const Icon(Icons.edit),
-                        isSelected: false,
-                        onPressed: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => const Drafts()));
-                        }),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 15),
-                    child: reuse.createIconButton(
-                        icon: const Icon(Icons.logout),
-                        isSelected: false,
-                        onPressed: logoutAccount),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const Follow(
+                                    followers: false,
+                                  )));
+                    },
+                    child: Column(
+                      children: [
+                        Text(appState.getFollowing(size: true).toString(),
+                            style: numberStyle),
+                        Text("Following", style: textStyle),
+                      ],
+                    ),
                   )
                 ],
               ),
+              centerTitle: true,
             ),
-            SliverPersistentHeader(
-                delegate: CustomSliverDelegate(title: "Your blogs"),
-                pinned: true),
+            SliverAppBar(
+              title: const Text("Your blogs"),
+              backgroundColor: theme.colorScheme.background,
+              surfaceTintColor: theme.colorScheme.background,
+              pinned: true,
+            )
           ];
         },
         body: Container(
@@ -122,56 +159,5 @@ class _ProfileState extends State<Profile> {
     appState.reset();
     await FirebaseAuth.instance.signOut();
     Phoenix.rebirth(context);
-  }
-}
-
-class CustomSliverDelegate extends SliverPersistentHeaderDelegate {
-  final String title;
-  final double topSafeArea;
-  final double maxExtent;
-
-  CustomSliverDelegate({
-    required this.title,
-    this.maxExtent = 56,
-    this.topSafeArea = 0,
-  });
-
-  @override
-  Widget build(
-      BuildContext context, double shrinkOffset, bool overlapsContent) {
-    var theme = Theme.of(context);
-    var textStyle = theme.textTheme.titleLarge!;
-
-    return Theme(
-      data: ThemeData.dark(),
-      child: ConstrainedBox(
-        constraints: BoxConstraints(minHeight: maxExtent),
-        child: Stack(
-          children: [
-            AppBar(
-              title: Padding(
-                padding: const EdgeInsets.only(left: 8),
-                child: Text(title, style: textStyle),
-              ),
-              backgroundColor: theme.colorScheme.background,
-              //surfaceTintColor: theme.colorScheme.primary,
-              elevation: 0,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  @override
-  OverScrollHeaderStretchConfiguration get stretchConfiguration =>
-      OverScrollHeaderStretchConfiguration();
-
-  @override
-  double get minExtent => kToolbarHeight + topSafeArea;
-
-  @override
-  bool shouldRebuild(SliverPersistentHeaderDelegate oldDelegate) {
-    return true;
   }
 }
