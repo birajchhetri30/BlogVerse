@@ -350,6 +350,7 @@ class CurrentUser extends ChangeNotifier {
     blogs = [];
     feedBlogs = [];
     likedBlogs = [];
+    drafts = [];
     userSnapshot = null;
     followers = [];
     following = [];
