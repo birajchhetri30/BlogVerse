@@ -236,8 +236,8 @@ class CurrentUser extends ChangeNotifier {
             'title': blog['title'],
             'body': blog['body'],
             'likes': blog['likes'],
-            'email': doc.id,
-            'author': doc['fname'] + " " + doc['lname']
+            'email': blog['email'],
+            'author': blog['author']
           };
           feedBlogs.add(blogMap);
         }
