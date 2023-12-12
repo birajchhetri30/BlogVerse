@@ -1,4 +1,6 @@
+import 'package:blogapp/account.dart';
 import 'package:blogapp/current_user.dart';
+import 'package:blogapp/main.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -16,6 +18,7 @@ class _ViewBlogState extends State<ViewBlog> {
   Widget build(BuildContext context) {
     var theme = Theme.of(context);
     var appState = context.watch<CurrentUser>();
+    var reuse = ReusableWidgets(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -65,8 +68,8 @@ class _ViewBlogState extends State<ViewBlog> {
                             },
                             isSelected: appState.blogIsLiked(widget.blog['id']),
                             selectedIcon:
-                                Icon(Icons.favorite, color: Colors.red),
-                            icon: Icon(Icons.favorite_outline)),
+                                const Icon(Icons.favorite, color: Colors.red),
+                            icon: const Icon(Icons.favorite_outline)),
                       ),
                     ),
                     Padding(
@@ -79,9 +82,9 @@ class _ViewBlogState extends State<ViewBlog> {
             ];
           },
           body: SingleChildScrollView(
-            padding: EdgeInsets.only(bottom: 20),
+            padding: const EdgeInsets.only(bottom: 20),
             child: Container(
-              padding: EdgeInsets.only(left: 20, right: 20),
+              padding: const EdgeInsets.only(left: 20, right: 20),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -95,7 +98,42 @@ class _ViewBlogState extends State<ViewBlog> {
                           : "Written by ${CurrentUser.fname} ${CurrentUser.lname}",
                       isHint: true),
                   const SizedBox(height: 20),
-                  createDisplayText(context, content: widget.blog['body'])
+                  createDisplayText(context, content: widget.blog['body']),
+                  const SizedBox(height: 40),
+                  GestureDetector(
+                      onTap: () async {
+                        showDialog<void>(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (context) {
+                            return reuse.showLoaderDialog(
+                                loadingText: "Loading");
+                          },
+                        );
+                        CurrentUser.fetchExtUserDetails(
+                            email: widget.blog['email']);
+                        var name = widget.blog['author'].toString().split(" ");
+                        Map<String, dynamic> user = {
+                          'email': widget.blog['email'],
+                          'fname': name[0],
+                          'lname': name[1]
+                        };
+                        await Future.delayed(Duration(seconds: 3));
+                        Navigator.pop(context);
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => Account(user: user)));
+                      },
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Text(
+                              "Visit ${widget.blog['author'].toString().split(" ")[0]}'s profile",
+                              style: theme.textTheme.bodyLarge!.copyWith(
+                                  color: theme.colorScheme.onBackground)),
+                        ],
+                      ))
                 ],
               ),
             ),
