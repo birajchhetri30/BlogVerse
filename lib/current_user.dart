@@ -387,6 +387,14 @@ class CurrentUser extends ChangeNotifier {
     return extUser;
   }
 
+  void refresh() {
+    feedBlogs = [];
+    fetchFeedBlogs();
+    blogs = [];
+    fetchBlogs();
+    notifyListeners();
+  }
+
   void reset() {
     fname = "";
     lname = "";
