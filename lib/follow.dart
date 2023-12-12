@@ -1,5 +1,6 @@
 import 'package:blogapp/account.dart';
 import 'package:blogapp/current_user.dart';
+import 'package:blogapp/main.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -45,11 +46,20 @@ class _FollowState extends State<Follow> {
   Widget createUserCard({required Map<String, dynamic> user}) {
     var theme = Theme.of(context);
     var titleStyle = theme.textTheme.headlineSmall!;
+    var reuse = ReusableWidgets(context);
 
     return GestureDetector(
       onTap: () async {
+        showDialog<void>(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) {
+            return reuse.showLoaderDialog(loadingText: "Loading");
+          },
+        );
         CurrentUser.fetchExtUserDetails(email: user['email']);
         await Future.delayed(Duration(seconds: 3));
+        Navigator.pop(context);
         Navigator.push(context,
             MaterialPageRoute(builder: (context) => Account(user: user)));
       },

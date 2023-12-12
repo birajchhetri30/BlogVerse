@@ -260,6 +260,14 @@ class ReusableWidgets {
                   if (blog['author'] != null && isFeed)
                     GestureDetector(
                         onTap: () async {
+                          showDialog<void>(
+                            context: context,
+                            barrierDismissible: false,
+                            builder: (context) {
+                              return showLoaderDialog(loadingText: "Loading");
+                            },
+                          );
+
                           CurrentUser.fetchExtUserDetails(email: blog['email']);
                           var name = blog['author'].toString().split(" ");
                           Map<String, dynamic> user = {
@@ -268,6 +276,7 @@ class ReusableWidgets {
                             'lname': name[1]
                           };
                           await Future.delayed(Duration(seconds: 3));
+                          Navigator.pop(context);
                           Navigator.push(
                               context,
                               MaterialPageRoute(
