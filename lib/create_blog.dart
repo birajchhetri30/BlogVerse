@@ -104,7 +104,9 @@ class _CreateBlogState extends State<CreateBlog> {
                         "${CurrentUser.currUser?.email}${titleController.text.trim()}",
                     'title': titleController.text.trim(),
                     'body': bodyController.text.trim(),
-                    'likes': 0
+                    'likes': 0,
+                    'author': "${CurrentUser.fname} ${CurrentUser.lname}",
+                    'email': CurrentUser.currUser?.email
                   };
 
                   if (titleController.text.isEmpty) {
