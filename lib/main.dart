@@ -4,11 +4,13 @@ import 'package:blogapp/account.dart';
 import 'package:blogapp/create_blog.dart';
 import 'package:blogapp/feed.dart';
 import 'package:blogapp/view_blog.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
@@ -235,6 +237,7 @@ class ReusableWidgets {
               ),
               const SizedBox(height: 10),
               Row(
+                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   if (!isDraft)
                     Container(
@@ -257,32 +260,49 @@ class ReusableWidgets {
                       style: theme.textTheme.bodyMedium!,
                     ),
                   const Spacer(),
-                  if (blog['author'] != null && isFeed)
-                    GestureDetector(
-                        onTap: () async {
-                          showDialog<void>(
-                            context: context,
-                            barrierDismissible: false,
-                            builder: (context) {
-                              return showLoaderDialog(loadingText: "Loading");
-                            },
-                          );
+                  Column(
+                    children: <Widget>[
+                      if (blog['author'] != null && isFeed)
+                        GestureDetector(
+                            onTap: () async {
+                              showDialog<void>(
+                                context: context,
+                                barrierDismissible: false,
+                                builder: (context) {
+                                  return showLoaderDialog(
+                                      loadingText: "Loading");
+                                },
+                              );
 
-                          CurrentUser.fetchExtUserDetails(email: blog['email']);
-                          var name = blog['author'].toString().split(" ");
-                          Map<String, dynamic> user = {
-                            'email': blog['email'],
-                            'fname': name[0],
-                            'lname': name[1]
-                          };
-                          await Future.delayed(Duration(seconds: 3));
-                          Navigator.pop(context);
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => Account(user: user)));
-                        },
-                        child: Text("${blog['author']}"))
+                              CurrentUser.fetchExtUserDetails(
+                                  email: blog['email']);
+                              var name = blog['author'].toString().split(" ");
+                              Map<String, dynamic> user = {
+                                'email': blog['email'],
+                                'fname': name[0],
+                                'lname': name[1]
+                              };
+                              await Future.delayed(const Duration(seconds: 3));
+                              Navigator.pop(context);
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          Account(user: user)));
+                            },
+                            child: Text(
+                              "${blog['author']}",
+                              textAlign: TextAlign.right,
+                            )),
+                      const SizedBox(height: 5),
+                      Text(
+                        (DateFormat('dd MMM yyyy').format(
+                                (blog['timestamp'] as Timestamp).toDate()))
+                            .toString(),
+                        style: TextStyle(color: theme.colorScheme.onBackground),
+                      )
+                    ],
+                  )
                 ],
               )
             ],
