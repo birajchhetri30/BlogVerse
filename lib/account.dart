@@ -130,13 +130,15 @@ class _AccountState extends State<Account> {
                         child: ListView(
                           padding: const EdgeInsets.only(bottom: 30),
                           children: [
-                            for (var blog in userDetails['blogs'])
+                            for (var blog
+                                in appState.getExtUserDetails()['blogs'])
                               reuse.createCard(
                                   blog: blog,
                                   isFeed: false,
                                   onLiked: () {
                                     setState(() {
-                                      appState.updateLikeCount(blog: blog);
+                                      appState.updateLikeCount(
+                                          blog: blog, email: blog['email']);
                                     });
                                   })
                           ],
