@@ -1,6 +1,7 @@
 import 'package:blogapp/home.dart';
 import 'package:blogapp/main.dart';
 import 'package:blogapp/profile.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:blogapp/current_user.dart';
 import 'package:provider/provider.dart';
@@ -18,24 +19,6 @@ class CreateBlog extends StatefulWidget {
 }
 
 class _CreateBlogState extends State<CreateBlog> {
-  static const _actionTitles = ['Publish Blog', 'Save as Draft'];
-
-  void _showAction(BuildContext context, int index) {
-    showDialog<void>(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            content: Text(_actionTitles[index]),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Close'),
-              )
-            ],
-          );
-        });
-  }
-
   @override
   Widget build(BuildContext context) {
     var theme = Theme.of(context);
@@ -61,7 +44,10 @@ class _CreateBlogState extends State<CreateBlog> {
                       "${CurrentUser.currUser?.email}${titleController.text.trim()}",
                   'title': titleController.text.trim(),
                   'body': bodyController.text.trim(),
-                  'likes': 0
+                  'likes': 0,
+                  'author': "${CurrentUser.fname} ${CurrentUser.lname}",
+                  'email': CurrentUser.currUser?.email,
+                  'timestamp': FieldValue.serverTimestamp()
                 };
 
                 if (titleController.text.isEmpty) {
@@ -106,7 +92,8 @@ class _CreateBlogState extends State<CreateBlog> {
                     'body': bodyController.text.trim(),
                     'likes': 0,
                     'author': "${CurrentUser.fname} ${CurrentUser.lname}",
-                    'email': CurrentUser.currUser?.email
+                    'email': CurrentUser.currUser?.email,
+                    'timestamp': FieldValue.serverTimestamp()
                   };
 
                   if (titleController.text.isEmpty) {
