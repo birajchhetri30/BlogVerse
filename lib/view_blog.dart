@@ -1,7 +1,9 @@
 import 'package:blogapp/account.dart';
 import 'package:blogapp/current_user.dart';
 import 'package:blogapp/main.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class ViewBlog extends StatefulWidget {
@@ -99,7 +101,12 @@ class _ViewBlogState extends State<ViewBlog> {
                       isHint: true),
                   const SizedBox(height: 20),
                   createDisplayText(context, content: widget.blog['body']),
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 30),
+                  Text(
+                    "Posted on ${(DateFormat('dd MMMM yyyy, h:mm a').format((widget.blog['timestamp'] as Timestamp).toDate()))}",
+                    style: TextStyle(color: theme.colorScheme.onBackground),
+                  ),
+                  const SizedBox(height: 30),
                   if (widget.blog['email'] != CurrentUser.currUser?.email)
                     GestureDetector(
                         onTap: () async {
