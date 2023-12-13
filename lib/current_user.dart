@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -225,6 +227,18 @@ class CurrentUser extends ChangeNotifier {
     }
   }
 
+  static List<Map<String, dynamic>> sortFeedBlogs() {
+    SplayTreeSet<Map<String, dynamic>> sortedFeedBlogs =
+        SplayTreeSet<Map<String, dynamic>>(
+            (a, b) => b['timestamp'].compareTo(a['timestamp']));
+
+    for (var blog in feedBlogs) {
+      sortedFeedBlogs.add(blog);
+    }
+
+    return sortedFeedBlogs.toList();
+  }
+
   static Future<void> fetchFeedBlogs() async {
     QuerySnapshot snapshot =
         await FirebaseFirestore.instance.collection("users").get();
@@ -240,6 +254,7 @@ class CurrentUser extends ChangeNotifier {
           Map<String, dynamic> blogMap = blog.data() as Map<String, dynamic>;
           feedBlogs.add(blogMap);
         }
+        feedBlogs = sortFeedBlogs();
       }
     }
   }
