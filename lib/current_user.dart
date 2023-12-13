@@ -61,7 +61,8 @@ class CurrentUser extends ChangeNotifier {
         .collection("blogs")
         .doc(newBlog['id'])
         .set(newBlog);
-    blogs.insert(0, newBlog);
+    blogs = [];
+    await fetchBlogs();
 
     notifyListeners();
   }
@@ -93,7 +94,8 @@ class CurrentUser extends ChangeNotifier {
         .collection("drafts")
         .doc(draft['id'])
         .set(draft);
-    drafts.insert(0, draft);
+    drafts = [];
+    await fetchDrafts();
 
     notifyListeners();
   }
@@ -235,14 +237,7 @@ class CurrentUser extends ChangeNotifier {
             .orderBy('timestamp', descending: true)
             .get();
         for (var blog in feedBlogSnapshot.docs) {
-          Map<String, dynamic> blogMap = {
-            'id': blog['id'],
-            'title': blog['title'],
-            'body': blog['body'],
-            'likes': blog['likes'],
-            'email': blog['email'],
-            'author': blog['author']
-          };
+          Map<String, dynamic> blogMap = blog.data() as Map<String, dynamic>;
           feedBlogs.add(blogMap);
         }
       }
@@ -378,6 +373,7 @@ class CurrentUser extends ChangeNotifier {
       Map<String, dynamic> blog = doc.data() as Map<String, dynamic>;
       userBlogs.add(blog);
     }
+    debugPrint("$userBlogs");
 
     extUser = {
       'followers': followerCount,
