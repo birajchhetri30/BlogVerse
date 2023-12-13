@@ -35,11 +35,12 @@ class CurrentUser extends ChangeNotifier {
     fetchDrafts();
   }
 
-  static void fetchBlogs() async {
+  static Future<void> fetchBlogs() async {
     QuerySnapshot blogSnapshot = await FirebaseFirestore.instance
         .collection("users")
         .doc(currUser?.email)
         .collection("blogs")
+        .orderBy('timestamp', descending: true)
         .get();
 
     for (var doc in blogSnapshot.docs) {
@@ -60,7 +61,7 @@ class CurrentUser extends ChangeNotifier {
         .collection("blogs")
         .doc(newBlog['id'])
         .set(newBlog);
-    blogs.add(newBlog);
+    blogs.insert(0, newBlog);
 
     notifyListeners();
   }
@@ -92,16 +93,17 @@ class CurrentUser extends ChangeNotifier {
         .collection("drafts")
         .doc(draft['id'])
         .set(draft);
-    drafts.add(draft);
+    drafts.insert(0, draft);
 
     notifyListeners();
   }
 
-  static void fetchDrafts() async {
+  static Future<void> fetchDrafts() async {
     QuerySnapshot snapshot = await FirebaseFirestore.instance
         .collection("users")
         .doc(currUser?.email)
         .collection("drafts")
+        .orderBy('timestamp', descending: true)
         .get();
 
     for (var doc in snapshot.docs) {
@@ -230,6 +232,7 @@ class CurrentUser extends ChangeNotifier {
             .collection("users")
             .doc(doc.id)
             .collection("blogs")
+            .orderBy('timestamp', descending: true)
             .get();
         for (var blog in feedBlogSnapshot.docs) {
           Map<String, dynamic> blogMap = {
@@ -391,7 +394,9 @@ class CurrentUser extends ChangeNotifier {
     feedBlogs = [];
     await fetchFeedBlogs();
     blogs = [];
-    fetchBlogs();
+    await fetchBlogs();
+    drafts = [];
+    await fetchDrafts();
     debugPrint("Feed blogs: $feedBlogs");
     notifyListeners();
   }
